@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
-import 'screens/health_screen.dart'; // 1. Importe o arquivo da sua tela
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'screens/login_screen.dart';
 
 void main() {
-  // A função main() é o ponto de partida de todo aplicativo Flutter.
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  @override
+@override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Remove o banner de "Debug" no canto superior direito
       debugShowCheckedModeBanner: false,
+      title: 'Health App',
 
-      // Define a tela inicial do aplicativo.
-      // Aqui estamos chamando a classe da nossa tela.
-      home: HealthScreen(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+      ],
+      locale: const Locale('pt', 'BR'), 
+
+      home: const LoginScreen(), 
     );
   }
 }

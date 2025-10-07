@@ -21,8 +21,8 @@ public class medicine {
 	private Long id;
 	private String name;
 	private String dose;
-	private LocalTime hour;
-	private LocalDate date;
+	private LocalTime hour_medicine;
+	private LocalDate date_medicine;
 	
 	public medicine() {
 	}
@@ -31,8 +31,8 @@ public class medicine {
 		this.id = id;
 		this.name = name;
 		this.dose = dose;
-		this.hour = hour;
-		this.date = date;
+		this.hour_medicine = hour;
+		this.date_medicine = date;
 	}
 
 	public Long getId() {
@@ -60,19 +60,19 @@ public class medicine {
 	}
 
 	public LocalTime getHour() {
-		return hour;
+		return hour_medicine;
 	}
 
 	public void setHour(LocalTime hour) {
-		this.hour = hour;
+		this.hour_medicine = hour;
 	}
 
 	public LocalDate getDate() {
-		return date;
+		return date_medicine;
 	}
 
 	public void setDate(LocalDate date) {
-		this.date = date;
+		this.date_medicine = date;
 	}
 
 	@Override

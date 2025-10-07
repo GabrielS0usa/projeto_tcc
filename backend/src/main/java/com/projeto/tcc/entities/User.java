@@ -23,8 +23,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 
-
-
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "tb_user")
