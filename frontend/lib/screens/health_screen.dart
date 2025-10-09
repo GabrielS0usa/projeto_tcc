@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:projeto/screens/diario_bem_estar_screen.dart';
 import 'medicine_screen.dart';
 import '../theme/app_colors.dart';
 
@@ -82,10 +83,7 @@ class HealthScreen extends StatelessWidget {
                       icon: FontAwesomeIcons.faceSmile,
                       color: VivaBemColors.botaoAmareloSol,      
                       context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Humor',
-                        backgroundColor: VivaBemColors.botaoAmareloSol,
-                      ),
+                      destinationPage: const DiarioBemEstarScreen(),
                     ),
                     _buildGridItem(
                       icon: FontAwesomeIcons.heartPulse,
