@@ -9,4 +9,6 @@ import com.projeto.tcc.entities.User;
 
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     List<Medicine> findByUserOrderByStartDateAscStartTimeAsc(User user);
+
+	List<Medicine> findByUser(User user);
 }

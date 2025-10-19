@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:projeto/screens/wellness_diary_screen.dart';
-import 'package:projeto/screens/health_screen.dart';
 import 'screens/login_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-@override
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -25,9 +27,9 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [
         Locale('pt', 'BR'),
       ],
-      locale: const Locale('pt', 'BR'), 
+      locale: const Locale('pt', 'BR'),
 
-      home: const HealthScreen(), 
+      home: const LoginScreen(),
     );
   }
 }

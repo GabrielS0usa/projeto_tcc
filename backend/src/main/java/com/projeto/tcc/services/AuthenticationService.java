@@ -67,6 +67,7 @@ public class AuthenticationService {
 		entity.setPhone(dto.phone());
 		entity.setBirthDate(LocalDate.parse(dto.birthDate(), formatter));
 		entity.setPassword(password);
+		entity.setCaregiverEmail(dto.caregiverEmail());
 		Role role = roleRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("Role padrão não encontrada"));
         entity.addRole(role);

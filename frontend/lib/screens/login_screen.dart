@@ -3,9 +3,9 @@ import 'package:projeto/screens/create_account_screen.dart';
 import 'package:projeto/screens/health_screen.dart';
 import '../widgets/header_clipper.dart';
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -40,9 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Substitua pela URL do seu endpoint de login
-      final url = Uri.parse('http://192.168.1.16:8080/auth/login');
+      final String baseUrl = dotenv.env['API_BASE_URL']!;
 
+      final url = Uri.parse('$baseUrl/auth/login');
+ 
       final response = await http.post(
         url,
         headers: {

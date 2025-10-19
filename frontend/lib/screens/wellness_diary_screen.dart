@@ -15,11 +15,12 @@ class WellnessDiaryScreen extends StatefulWidget {
   _WellnessDiaryScreenState createState() => _WellnessDiaryScreenState();
 }
 
+
 class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
   Humor? _selectedHumor;
   final TextEditingController _noteController = TextEditingController();
   PeriodoDia _currentPeriod = PeriodoDia.manha;
-  
+
   Humor? _registroManha;
   Humor? _registroTarde;
   Humor? _registroNoite;
@@ -77,6 +78,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
         backgroundColor: DiarioPalete.amareloPrincipal,
         title: const Text(
           'Meu Diário de Bem-Estar',
+
           style: TextStyle(color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: VivaBemColors.cinzaEscuro),
@@ -97,7 +99,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildDailyProgressTracker(),
-            const SizedBox(height: 40), // AUMENTADO: Mais espaço vertical
+            const SizedBox(height: 40), 
             if (!_isPeriodoAtualRegistrado) _buildRegistroSection(),
             if (_isPeriodoAtualRegistrado) _buildMensagemConcluido(),
           ],
@@ -137,7 +139,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(20), // AUMENTADO: Mais preenchimento interno
+          padding: const EdgeInsets.all(20), 
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isCompleted
@@ -184,17 +186,17 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
 
   Widget _buildMensagemConcluido() {
     return Container(
-      padding: const EdgeInsets.all(30), // AUMENTADO: Mais espaçamento
+      padding: const EdgeInsets.all(30), 
       decoration: BoxDecoration(
         color: VivaBemColors.verdeConfirmacao.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20), // AUMENTADO: Bordas mais arredondadas
+        borderRadius: BorderRadius.circular(20), 
         border: Border.all(color: VivaBemColors.verdeConfirmacao.withOpacity(0.3))
       ),
       child: const Center(
         child: Text(
           "Seu sentimento de hoje já foi registrado!\nVolte mais tarde.",
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, color: VivaBemColors.verdeConfirmacao, fontWeight: FontWeight.bold, height: 1.5), // AUMENTADO: Tamanho da fonte e espaçamento entre linhas
+          style: TextStyle(fontSize: 20, color: VivaBemColors.verdeConfirmacao, fontWeight: FontWeight.bold, height: 1.5), 
         ),
       ),
     );
@@ -219,7 +221,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
       onTap: () => setState(() => _selectedHumor = humor),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), // AUMENTADO: Botão maior
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), 
         decoration: BoxDecoration(
           color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
@@ -254,7 +256,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
           TextField(
             controller: _noteController,
             maxLines: 4,
-            style: const TextStyle(color: VivaBemColors.branco, fontSize: 16), // AUMENTADO: Fonte do texto digitado
+            style: const TextStyle(color: VivaBemColors.branco, fontSize: 16),
             decoration: InputDecoration(
               hintText: "Escreva aqui, se desejar...",
               hintStyle: TextStyle(color: VivaBemColors.branco.withOpacity(0.5)),
@@ -287,7 +289,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
             ),
             child: const Text(
               'Salvar Sentimento',
-              style: TextStyle(fontSize: 20, color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold), // AUMENTADO: Fonte do botão
+              style: TextStyle(fontSize: 20, color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold), 
             ),
           )
         ],

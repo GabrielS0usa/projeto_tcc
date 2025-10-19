@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import '../widgets/header_clipper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _dateController = TextEditingController();
+  final _caregiverEmailController = TextEditingController();
 
   @override
   void dispose() {
@@ -31,6 +33,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     _dateController.dispose();
+    _caregiverEmailController.dispose();
     super.dispose();
   }
 
@@ -44,8 +47,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     });
 
     try {
-      //final baseUrl = dotenv.env['API_BASE_URL']!;
-      final url = Uri.parse('http://192.168.1.16:8080/auth/register');
+      final String baseUrl = dotenv.env['API_BASE_URL']!;
+
+      final url = Uri.parse('$baseUrl/auth/register');
 
       final response = await http.post(
         url,
@@ -58,6 +62,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           'phone': _phoneController.text,
           'birthDate': _dateController.text,
           'password': _passwordController.text,
+          'caregiverEmail': _caregiverEmailController.text,
         }),
       );
 
@@ -172,12 +177,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             ),
             const SizedBox(height: 30),
             _buildTextField(
-                controller: _nameController, label: 'NOME', hint: ''),
+                controller: _nameController, label: 'NOME', hint: 'NOME'),
             const SizedBox(height: 20),
             _buildTextField(
                 controller: _emailController,
                 label: 'EMAIL',
-                hint: '',
+                hint: 'EMAIL',
                 keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 20),
             _buildTextField(
@@ -185,6 +190,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 label: 'TELEFONE',
                 hint: '(XX) XXXXX-XXXX',
                 keyboardType: TextInputType.phone),
+            const SizedBox(height: 20),
+            _buildTextField(
+              controller: _caregiverEmailController,
+              label: 'EMAIL DO CUIDADOR (OPCIONAL)',
+              hint: 'email.cuidador@exemplo.com',
+              keyboardType: TextInputType.emailAddress,
+              isOptional: true, 
+            ),
             const SizedBox(height: 20),
             _buildPasswordField(),
             const SizedBox(height: 20),
@@ -213,35 +226,37 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      required String label,
-      required String hint,
-      TextInputType keyboardType = TextInputType.text}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: Colors.grey.shade200,
-            border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Por favor, preencha este campo';
-            }
-            return null;
-          },
-        ),
-      ],
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    TextInputType keyboardType = TextInputType.text,
+    bool isOptional = false, 
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: Colors.grey.shade200,
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
+      ),
+      validator: (value) {
+        if (!isOptional && (value == null || value.isEmpty)) {
+          return 'Por favor, preencha este campo';
+        }
+        if (keyboardType == TextInputType.emailAddress &&
+            value != null &&
+            value.isNotEmpty) {
+          if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+            return 'Por favor, insira um email válido';
+          }
+        }
+        return null;
+      },
     );
   }
 
