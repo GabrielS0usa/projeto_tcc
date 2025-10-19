@@ -5,22 +5,15 @@ import java.time.LocalTime;
 
 import com.projeto.tcc.entities.Medicine;
 
-import jakarta.validation.constraints.Email;
-
 public class MedicineDTO {
 
     private Long id;
-    
-    @Email
     private String name;
     private String dose;
     private LocalTime startTime;
     private Integer intervalHours;
     private Integer durationDays;
     private LocalDate startDate;
-    
-    @Email(message = "Email do cuidador inválido")
-    private String caregiverEmail;
 
     public MedicineDTO() {}
 

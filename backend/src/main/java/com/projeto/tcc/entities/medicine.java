@@ -32,8 +32,6 @@ public class Medicine {
 
     private LocalDate startDate;
     
-    private String caregiverEmail;
-    
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -114,14 +112,6 @@ public class Medicine {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
-	public String getCaregiverEmail() {
-        return caregiverEmail;
-    }
-
-    public void setCaregiverEmail(String caregiverEmail) {
-        this.caregiverEmail = caregiverEmail;
-    }
 
 	@Override
 	public int hashCode() {

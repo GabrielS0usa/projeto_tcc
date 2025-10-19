@@ -79,7 +79,7 @@ public class MedicineService {
 				while (taskTime.toLocalDate().isEqual(today)) {
 					MedicationTask task = findOrCreateTask(schedule, taskTime);
 
-					todayTasks.add(new MedicationTaskDTO(task.getId(), schedule.getName(), schedule.getDose(),
+					todayTasks.add(new MedicationTaskDTO(task.getId(), schedule.getId(), schedule.getName(), schedule.getDose(),
 							task.getScheduledTime(), task.isTaken()));
 
 					taskTime = taskTime.plusHours(schedule.getIntervalHours());

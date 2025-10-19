@@ -43,4 +43,10 @@ class ApiService {
     final body = jsonEncode(data);
     return http.put(url, headers: headers, body: body);
   }
+
+  Future<http.Response> delete(String endpoint) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final headers = await _getAuthHeaders();
+    return http.delete(url, headers: headers);
+  }
 }

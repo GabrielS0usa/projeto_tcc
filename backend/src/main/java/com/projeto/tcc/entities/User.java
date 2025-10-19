@@ -39,7 +39,7 @@ public class User implements UserDetails {
     private LocalDate birthDate;
     private String password;
 
-  
+    private String caregiverEmail;
     
     @ManyToMany
     @JoinTable(name = "tb_user_role",
@@ -113,6 +113,14 @@ public class User implements UserDetails {
 	
 	public void addRole(Role role) {
     	roles.add(role);
+    }
+	
+	public String getCaregiverEmail() {
+        return caregiverEmail;
+    }
+
+    public void setCaregiverEmail(String caregiverEmail) {
+        this.caregiverEmail = caregiverEmail;
     }
     
     public boolean hasRole(String roleName) {
