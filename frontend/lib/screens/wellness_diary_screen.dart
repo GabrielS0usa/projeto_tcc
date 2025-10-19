@@ -1,28 +1,25 @@
-// lib/screens/diario_bem_estar_screen.dart
+// lib/screens/wellness_diary_screen.dart (ou o nome do seu arquivo)
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 
-// Enums para deixar o código mais limpo e seguro
 enum Humor { ansioso, triste, neutro, calmo, alegre }
 enum PeriodoDia { manha, tarde, noite }
 
-class DiarioBemEstarScreen extends StatefulWidget {
-  const DiarioBemEstarScreen({Key? key}) : super(key: key);
+class WellnessDiaryScreen extends StatefulWidget {
+  const WellnessDiaryScreen({Key? key}) : super(key: key);
 
   @override
-  _DiarioBemEstarScreenState createState() => _DiarioBemEstarScreenState();
+  _WellnessDiaryScreenState createState() => _WellnessDiaryScreenState();
 }
 
-class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
-  // Variáveis de estado da tela
+class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
   Humor? _selectedHumor;
   final TextEditingController _noteController = TextEditingController();
   PeriodoDia _currentPeriod = PeriodoDia.manha;
   
-  // Simulação de registros salvos
   Humor? _registroManha;
   Humor? _registroTarde;
   Humor? _registroNoite;
@@ -49,10 +46,9 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
     } else {
       _currentPeriod = PeriodoDia.noite;
     }
-  }
-
-  String _getFormattedDate() {
-    return DateFormat('EEEE, d \'de\' MMMM', 'pt_BR').format(DateTime.now());
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _salvarSentimento() {
@@ -78,12 +74,12 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
     return Scaffold(
       backgroundColor: VivaBemColors.cinzaEscuro,
       appBar: AppBar(
-        backgroundColor: VivaBemColors.botaoAmareloSol,
+        backgroundColor: DiarioPalete.amareloPrincipal,
         title: const Text(
           'Meu Diário de Bem-Estar',
-          style: TextStyle(color: VivaBemColors.botaoAzulProfundo), // MUDANÇA: Texto branco
+          style: TextStyle(color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold),
         ),
-        iconTheme: const IconThemeData(color: VivaBemColors.botaoAzulProfundo), // MUDANÇA: Ícone de voltar branco
+        iconTheme: const IconThemeData(color: VivaBemColors.cinzaEscuro),
         actions: [
           IconButton(
             icon: const Icon(Icons.history_rounded),
@@ -98,17 +94,12 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _buildDailyProgressTracker(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 40), // AUMENTADO: Mais espaço vertical
             if (!_isPeriodoAtualRegistrado) _buildRegistroSection(),
             if (_isPeriodoAtualRegistrado) _buildMensagemConcluido(),
-            const SizedBox(height: 30),
-            if (_registroManha != null || _registroTarde != null || _registroNoite != null)
-              _buildInspirationCard(),
-            const SizedBox(height: 20),
-            _buildToolsCard(),
           ],
         ),
       ),
@@ -121,10 +112,9 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
       children: [
         const Text(
           'Seus registros de hoje:',
-          // MUDANÇA: Texto branco para o tema escuro
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -142,33 +132,32 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
     bool isCompleted = (_registroManha != null && periodo == PeriodoDia.manha) ||
                        (_registroTarde != null && periodo == PeriodoDia.tarde) ||
                        (_registroNoite != null && periodo == PeriodoDia.noite);
-    // MUDANÇA: Cor inativa ajustada para o tema escuro
     Color inactiveColor = VivaBemColors.branco.withOpacity(0.4);
 
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20), // AUMENTADO: Mais preenchimento interno
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isCompleted
                 ? VivaBemColors.verdeConfirmacao.withOpacity(0.2)
                 : isActive
-                    ? VivaBemColors.laranjaSuave.withOpacity(0.2)
-                    : Colors.transparent, // Fundo transparente para inativos
+                    ? DiarioPalete.periodoAtivo.withOpacity(0.2)
+                    : Colors.transparent,
             border: Border.all(
               color: isCompleted
                   ? VivaBemColors.verdeConfirmacao
-                  : isActive ? VivaBemColors.laranjaSuave : inactiveColor,
-              width: 2,
+                  : isActive ? DiarioPalete.periodoAtivo : inactiveColor,
+              width: 2.5, // AUMENTADO: Borda mais espessa
             ),
           ),
           child: isCompleted
-              ? const Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 28)
-              : Icon(icon, color: isActive ? VivaBemColors.laranjaPrimario : inactiveColor, size: 28),
+              ? Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 32) // AUMENTADO: Ícone maior
+              : Icon(icon, color: isActive ? DiarioPalete.periodoAtivo : inactiveColor, size: 32),
         ),
-        const SizedBox(height: 8),
-        Text(label, style: TextStyle(color: isCompleted ? VivaBemColors.verdeConfirmacao : isActive ? VivaBemColors.laranjaPrimario : inactiveColor))
+        const SizedBox(height: 12),
+        Text(label, style: TextStyle(fontSize: 14, color: isCompleted ? VivaBemColors.verdeConfirmacao : isActive ? DiarioPalete.periodoAtivo : inactiveColor))
       ],
     );
   }
@@ -177,15 +166,13 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           'Como você está se sentindo agora?',
           textAlign: TextAlign.center,
-          // MUDANÇA: Texto branco
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 25),
         _buildHumorSelection(),
-        // Usando AnimatedSize para uma transição suave ao aparecer
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -197,32 +184,31 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
 
   Widget _buildMensagemConcluido() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(30), // AUMENTADO: Mais espaçamento
       decoration: BoxDecoration(
         color: VivaBemColors.verdeConfirmacao.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(20), // AUMENTADO: Bordas mais arredondadas
         border: Border.all(color: VivaBemColors.verdeConfirmacao.withOpacity(0.3))
       ),
       child: const Center(
         child: Text(
           "Seu sentimento de hoje já foi registrado!\nVolte mais tarde.",
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: VivaBemColors.verdeConfirmacao, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 20, color: VivaBemColors.verdeConfirmacao, fontWeight: FontWeight.bold, height: 1.5), // AUMENTADO: Tamanho da fonte e espaçamento entre linhas
         ),
       ),
     );
   }
   
   Widget _buildHumorSelection() {
-    // ... (Este widget já funciona bem no tema escuro)
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildHumorButton(Humor.ansioso, FontAwesomeIcons.faceGrimace, "Ansioso", VivaBemColors.vermelhoSuave),
-        _buildHumorButton(Humor.triste, FontAwesomeIcons.faceFrown, "Triste", VivaBemColors.laranjaPrimario),
-        _buildHumorButton(Humor.neutro, FontAwesomeIcons.faceMeh, "Neutro", VivaBemColors.branco),
-        _buildHumorButton(Humor.calmo, FontAwesomeIcons.faceSmile, "Calmo", VivaBemColors.azulPrimario),
-        _buildHumorButton(Humor.alegre, FontAwesomeIcons.faceLaughBeam, "Alegre", VivaBemColors.verdeConfirmacao),
+        _buildHumorButton(Humor.ansioso, FontAwesomeIcons.faceTired, "Ansioso", DiarioPalete.corAnsioso),
+        _buildHumorButton(Humor.triste, FontAwesomeIcons.faceFrown, "Triste", DiarioPalete.corTriste),
+        _buildHumorButton(Humor.neutro, FontAwesomeIcons.faceMeh, "Neutro", DiarioPalete.corNeutro),
+        _buildHumorButton(Humor.calmo, FontAwesomeIcons.faceSmile, "Calmo", DiarioPalete.corCalmo),
+        _buildHumorButton(Humor.alegre, FontAwesomeIcons.faceLaughBeam, "Alegre", DiarioPalete.corAlegre),
       ],
     );
   }
@@ -233,9 +219,9 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
       onTap: () => setState(() => _selectedHumor = humor),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8), // AUMENTADO: Botão maior
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.4) : Colors.transparent,
+          color: isSelected ? color.withOpacity(0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -244,9 +230,9 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
         ),
         child: Column(
           children: [
-            Icon(icon, size: 36, color: color),
-            const SizedBox(height: 8),
-            Text(label, style: TextStyle(color: color, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+            Icon(icon, size: 44, color: color),
+            const SizedBox(height: 12),
+            Text(label, style: TextStyle(fontSize: 16, color: color, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
           ],
         ),
       ),
@@ -261,31 +247,32 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
         children: [
           Text(
             _getAnnotationPrompt(),
-            style: const TextStyle(fontSize: 16, color: VivaBemColors.branco),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, color: VivaBemColors.branco),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           TextField(
             controller: _noteController,
             maxLines: 4,
-            style: const TextStyle(color: VivaBemColors.branco),
+            style: const TextStyle(color: VivaBemColors.branco, fontSize: 16), // AUMENTADO: Fonte do texto digitado
             decoration: InputDecoration(
               hintText: "Escreva aqui, se desejar...",
               hintStyle: TextStyle(color: VivaBemColors.branco.withOpacity(0.5)),
               filled: true,
               fillColor: VivaBemColors.branco.withOpacity(0.05),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: VivaBemColors.branco.withOpacity(0.2)),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: VivaBemColors.azulClaro, width: 2),
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: DiarioPalete.corCalmo, width: 2),
               ),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(icon: const Icon(Icons.mic, color: VivaBemColors.azulClaro), onPressed: () {/* TODO: Voice Input */}),
-                  IconButton(icon: const Icon(Icons.photo_camera, color: VivaBemColors.azulClaro), onPressed: () {/* TODO: Photo Input */}),
+                  IconButton(icon: Icon(Icons.mic, color: DiarioPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
+                  IconButton(icon: Icon(Icons.photo_camera, color: DiarioPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
                 ],
               ),
             ),
@@ -294,13 +281,13 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
           ElevatedButton(
             onPressed: _salvarSentimento,
             style: ElevatedButton.styleFrom(
-              backgroundColor: VivaBemColors.laranjaPrimario,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              backgroundColor: DiarioPalete.amareloPrincipal,
+              padding: const EdgeInsets.symmetric(vertical: 18), // AUMENTADO: Botão mais alto
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             ),
             child: const Text(
               'Salvar Sentimento',
-              style: TextStyle(fontSize: 18, color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold), // AUMENTADO: Fonte do botão
             ),
           )
         ],
@@ -316,54 +303,5 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
       case Humor.ansioso: return "Respire fundo. Se quiser, escreva o que está sentindo.";
       default: return "Quer adicionar uma anotação sobre seu sentimento?";
     }
-  }
-
-  Widget _buildInspirationCard() {
-    return Card(
-      // MUDANÇA: Cor do card ajustada para o tema escuro
-      color: VivaBemColors.laranjaPrimario.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: VivaBemColors.laranjaPrimario.withOpacity(0.5), width: 1),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: ListTile(
-          leading: Icon(FontAwesomeIcons.lightbulb, color: VivaBemColors.laranjaPrimario),
-          title: Text("Frase do Dia", style: TextStyle(fontWeight: FontWeight.bold, color: VivaBemColors.laranjaPrimario)),
-          subtitle: Text("A gentileza é a linguagem que o surdo pode ouvir e o cego pode ver.", style: TextStyle(color: VivaBemColors.branco, fontStyle: FontStyle.italic)),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToolsCard() {
-    return Card(
-      // MUDANÇA: Cor do card ajustada para o tema escuro
-      color: VivaBemColors.azulClaro.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: VivaBemColors.azulClaro.withOpacity(0.5), width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text("Precisa de uma Pausa?", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: VivaBemColors.azulClaro)),
-            const SizedBox(height: 4),
-            const Text("Faça 1 minuto de respiração para acalmar a mente.", style: TextStyle(color: VivaBemColors.branco)),
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: () {/* TODO: Breathing exercise screen */},
-                child: const Text("Começar Exercício →", style: TextStyle(color: VivaBemColors.azulClaro, fontWeight: FontWeight.bold)),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
   }
 }
