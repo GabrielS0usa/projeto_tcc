@@ -5,7 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 
-// Enums para deixar o código mais limpo e seguro
 enum Humor { ansioso, triste, neutro, calmo, alegre }
 enum PeriodoDia { manha, tarde, noite }
 
@@ -17,12 +16,11 @@ class DiarioBemEstarScreen extends StatefulWidget {
 }
 
 class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
-  // Variáveis de estado da tela
   Humor? _selectedHumor;
   final TextEditingController _noteController = TextEditingController();
   PeriodoDia _currentPeriod = PeriodoDia.manha;
   
-  // Simulação de registros salvos
+
   Humor? _registroManha;
   Humor? _registroTarde;
   Humor? _registroNoite;
@@ -81,9 +79,9 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
         backgroundColor: VivaBemColors.botaoAmareloSol,
         title: const Text(
           'Meu Diário de Bem-Estar',
-          style: TextStyle(color: VivaBemColors.botaoAzulProfundo), // MUDANÇA: Texto branco
+          style: TextStyle(color: VivaBemColors.botaoAzulProfundo), 
         ),
-        iconTheme: const IconThemeData(color: VivaBemColors.botaoAzulProfundo), // MUDANÇA: Ícone de voltar branco
+        iconTheme: const IconThemeData(color: VivaBemColors.botaoAzulProfundo), 
         actions: [
           IconButton(
             icon: const Icon(Icons.history_rounded),
@@ -121,7 +119,6 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
       children: [
         const Text(
           'Seus registros de hoje:',
-          // MUDANÇA: Texto branco para o tema escuro
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
         ),
         const SizedBox(height: 16),
@@ -142,7 +139,6 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
     bool isCompleted = (_registroManha != null && periodo == PeriodoDia.manha) ||
                        (_registroTarde != null && periodo == PeriodoDia.tarde) ||
                        (_registroNoite != null && periodo == PeriodoDia.noite);
-    // MUDANÇA: Cor inativa ajustada para o tema escuro
     Color inactiveColor = VivaBemColors.branco.withOpacity(0.4);
 
     return Column(
@@ -155,7 +151,7 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
                 ? VivaBemColors.verdeConfirmacao.withOpacity(0.2)
                 : isActive
                     ? VivaBemColors.laranjaSuave.withOpacity(0.2)
-                    : Colors.transparent, // Fundo transparente para inativos
+                    : Colors.transparent, 
             border: Border.all(
               color: isCompleted
                   ? VivaBemColors.verdeConfirmacao
@@ -180,12 +176,10 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
         const Text(
           'Como você está se sentindo agora?',
           textAlign: TextAlign.center,
-          // MUDANÇA: Texto branco
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: VivaBemColors.branco),
         ),
         const SizedBox(height: 20),
         _buildHumorSelection(),
-        // Usando AnimatedSize para uma transição suave ao aparecer
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
@@ -214,7 +208,6 @@ class _DiarioBemEstarScreenState extends State<DiarioBemEstarScreen> {
   }
   
   Widget _buildHumorSelection() {
-    // ... (Este widget já funciona bem no tema escuro)
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

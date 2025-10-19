@@ -1,6 +1,12 @@
+// lib/screens/medicines_screen.dart
+
 import 'package:flutter/material.dart';
-import '../models/medicine_model.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import '../models/medication_task.dart';
+import '../services/api_service.dart';
 import 'add_medicine_screen.dart';
+import '../models/medicine_model.dart';
 
 class MedicinesScreen extends StatefulWidget {
   const MedicinesScreen({Key? key}) : super(key: key);
@@ -10,19 +16,80 @@ class MedicinesScreen extends StatefulWidget {
 }
 
 class _MedicinesScreenState extends State<MedicinesScreen> {
-  final List<Medicine> _medicines = [
-    Medicine(name: 'Omeprazole', dose: '20 mg', time: '09:00'),
-    Medicine(name: 'Dipyrone', dose: '10 mg', time: '09:00'),
-    Medicine(name: 'Losartan', dose: '20 mg', time: '09:00'),
-    Medicine(name: 'Simvastatin', dose: '40 mg', time: '09:00'),
-    Medicine(name: 'Paracetamol', dose: '750 mg', time: '14:00'),
-  ];
+  List<MedicationTask> _tasks = [];
+  bool _isLoading = true;
+  final ApiService _apiService = ApiService();
 
-  void _markAsTaken(int index, bool? newState) {
-    setState(() {
-      _medicines[index].taken = newState ?? false;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodayTasks();
   }
+
+  Future<void> _fetchTodayTasks() async {
+    try {
+      final response = await _apiService.get('/medicines/tasks/today');
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _tasks = data.map((json) => MedicationTask.fromJson(json)).toList();
+        });
+      } else {
+        _showError('Falha ao carregar as tarefas.');
+      }
+    } catch (e) {
+      _showError('Erro de conexão: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _markAsTaken(int index, bool newState) async {
+    final task = _tasks[index];
+
+    setState(() {
+      task.taken = newState;
+    });
+
+    try {
+      final response = await _apiService.put(
+        '/medicines/tasks/${task.taskId}',
+        {'taken': newState},
+      );
+
+      if (response.statusCode != 200) {
+        setState(() {
+          task.taken = !newState;
+        });
+        _showError('Falha ao salvar o status. Tente novamente.');
+      }
+    } catch (e) {
+      setState(() {
+        task.taken = !newState;
+      });
+      _showError('Erro de conexão ao salvar.');
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void _showSuccess(String message) {
+  if (!mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message), backgroundColor: Colors.green),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -34,73 +101,75 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           onPressed: () => Navigator.pop(context),
           color: Colors.white,
         ),
-        title: const Text('Medicines', style: TextStyle(color: Colors.white)),
+        title: const Text('Remédios de Hoje',
+            style: TextStyle(color: Colors.white)),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                Color(0xFF89D2F3),
-                Color(0xFFC0E6FF),
-              ],
+              colors: [Color(0xFF89D2F3), Color(0xFFC0E6FF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
           ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _medicines.length,
-        itemBuilder: (context, index) {
-          final medicine = _medicines[index];
-          return _buildMedicineItem(medicine, index);
-        },
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _tasks.isEmpty
+              ? const Center(child: Text("Nenhum remédio agendado para hoje."))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: _tasks.length,
+                  itemBuilder: (context, index) =>
+                      _buildMedicineItem(_tasks[index], index),
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newMedicine = await Navigator.push(
+          
+          final newMedicineSchedule = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddMedicineScreen()),
           );
-          if (newMedicine != null && newMedicine is Medicine) {
-            setState(() {
-              _medicines.add(newMedicine);
-            });
+
+          if (newMedicineSchedule != null && newMedicineSchedule is Medicine) {
+            try {
+              
+              Map<String, dynamic> scheduleData = {
+                "name": newMedicineSchedule.name,
+                "dose": newMedicineSchedule.dose,
+                "startTime": newMedicineSchedule.startTime,
+                "intervalHours": newMedicineSchedule.intervalHours,
+                "durationDays": newMedicineSchedule.durationDays,
+                "startDate": newMedicineSchedule.startDate
+              };
+
+              final response =
+                  await _apiService.post('/medicines/save', scheduleData);
+
+              if (response.statusCode == 201) {
+                _showSuccess('Remédio salvo com sucesso!');
+                setState(() {
+                  _isLoading = true;
+                });
+                _fetchTodayTasks(); 
+              } else {
+                final errorData = jsonDecode(response.body);
+                _showError(
+                    errorData['message'] ?? 'Falha ao salvar o novo remédio.');
+              }
+            } catch (e) {
+              _showError('Erro de conexão ao salvar.');
+            }
           }
         },
         backgroundColor: Colors.black,
         child: const Icon(Icons.add, color: Colors.white, size: 30),
         shape: const CircleBorder(),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.white.withOpacity(0.7),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 30),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart, size: 30),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings, size: 30),
-            label: 'Settings',
-          ),
-        ],
-      ),
-      extendBody: true,
     );
   }
 
-  Widget _buildMedicineItem(Medicine medicine, int index) {
+  Widget _buildMedicineItem(MedicationTask task, int index) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
@@ -114,33 +183,34 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           Transform.scale(
             scale: 1.8,
             child: Checkbox(
-              value: medicine.taken,
+              value: task.taken,
               onChanged: (bool? newState) {
-                _markAsTaken(index, newState);
+                if (newState != null) {
+                  _markAsTaken(index, newState);
+                }
               },
               activeColor: Colors.black,
               checkColor: Colors.white,
               side: BorderSide(color: Colors.grey.shade400, width: 2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
+                  borderRadius: BorderRadius.circular(4)),
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '${medicine.name} ${medicine.dose}',
+              '${task.name} ${task.dose}',
               style: TextStyle(
-                color: medicine.taken ? Colors.grey.shade500 : Colors.black87,
-                decoration: medicine.taken ? TextDecoration.lineThrough : null,
+                color: task.taken ? Colors.grey.shade500 : Colors.black87,
+                decoration: task.taken ? TextDecoration.lineThrough : null,
                 fontSize: 16,
               ),
             ),
           ),
           Text(
-            medicine.time,
+            DateFormat('HH:mm').format(task.scheduledTime),
             style: TextStyle(
-              color: medicine.taken ? Colors.grey.shade400 : Colors.black54,
+              color: task.taken ? Colors.grey.shade400 : Colors.black54,
               fontSize: 15,
             ),
           ),

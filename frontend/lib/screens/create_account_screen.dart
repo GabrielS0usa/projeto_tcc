@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import '../widgets/header_clipper.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);
@@ -44,8 +45,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     });
 
     try {
-      //final baseUrl = dotenv.env['API_BASE_URL']!;
-      final url = Uri.parse('http://192.168.1.16:8080/auth/register');
+      final String baseUrl = dotenv.env['API_BASE_URL']!;
+
+      final url = Uri.parse('$baseUrl/auth/register');
 
       final response = await http.post(
         url,
