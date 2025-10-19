@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projeto/screens/diario_bem_estar_screen.dart';
+import 'package:projeto/screens/health_mngment.dart';
+import 'package:projeto/screens/nutritional_diary_screen.dart';
+import 'package:projeto/screens/wellness_diary_screen.dart';
+import 'health_mngment.dart';
 import 'medicine_screen.dart';
 import '../theme/app_colors.dart';
 
 class HealthScreen extends StatelessWidget {
   const HealthScreen({Key? key}) : super(key: key);
 
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +41,6 @@ class HealthScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               _buildProgressBar(),
-
               const SizedBox(height: 40),
               Expanded(
                 child: GridView.count(
@@ -47,52 +50,46 @@ class HealthScreen extends StatelessWidget {
                   childAspectRatio: 1.1,
                   children: [
                     _buildGridItem(
-                      icon: FontAwesomeIcons.pills,
-                      color: VivaBemColors.botaoVerdeEsmeralda, 
-                      context: context,
-                      destinationPage: const MedicinesScreen(),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.dumbbell,
-                      color: VivaBemColors.botaoRoxoAmetista,    
-                      context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Exercícios',
-                        backgroundColor: VivaBemColors.botaoRoxoAmetista,
-                      ),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.utensils,
-                      color: VivaBemColors.botaoLaranjaQueimado, 
-                      context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Alimentação',
-                        backgroundColor: VivaBemColors.botaoLaranjaQueimado,
-                      ),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.glassWater,
-                      color: VivaBemColors.botaoAzulProfundo,    
-                      context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Hidratação',
-                        backgroundColor: VivaBemColors.botaoAzulProfundo,
-                      ),
-                    ),
-                    _buildGridItem(
                       icon: FontAwesomeIcons.faceSmile,
-                      color: VivaBemColors.botaoAmareloSol,      
+                      color: VivaBemColors.amareloDourado, // MUDANÇA
                       context: context,
-                      destinationPage: const DiarioBemEstarScreen(),
+                      destinationPage: const WellnessDiaryScreen(),
                     ),
                     _buildGridItem(
                       icon: FontAwesomeIcons.heartPulse,
-                      color: VivaBemColors.botaoVermelhoPaixao,  
+                      color: VivaBemColors.vermelhoVibrante, // MUDANÇA
+                      context: context,
+                      destinationPage: const SaudeGestaoScreen(),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.brain,
+                      color: VivaBemColors.azulRoyal, // MUDANÇA
                       context: context,
                       destinationPage: const DetailPage(
-                        title: 'Saúde',
-                        backgroundColor: VivaBemColors.botaoVermelhoPaixao,
+                        title: 'Mente Ativa',
+                        backgroundColor: VivaBemColors.azulRoyal, // MUDANÇA
                       ),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.dumbbell,
+                      color: VivaBemColors.rosaVibrante, // MUDANÇA
+                      context: context,
+                      destinationPage: const DetailPage(
+                        title: 'Exercícios',
+                        backgroundColor: VivaBemColors.rosaVibrante, // MUDANÇA
+                      ),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.plateWheat,
+                      color: VivaBemColors.laranjaVibrante, // MUDANÇA
+                      context: context,
+                      destinationPage: const NutricaoDiarioScreen(),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.pills,
+                      color: VivaBemColors.verdeEsmeralda, // MUDANÇA
+                      context: context,
+                      destinationPage: const MedicinesScreen(),
                     ),
                   ],
                 ),
@@ -103,10 +100,10 @@ class HealthScreen extends StatelessWidget {
       ),
 
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: VivaBemColors.azulPrimario,
-        selectedItemColor: VivaBemColors.laranjaPrimario,
+        backgroundColor: VivaBemColors.azulMarinho, // MUDANÇA
+        selectedItemColor: VivaBemColors.amareloDourado, // MUDANÇA
         unselectedItemColor: VivaBemColors.branco.withOpacity(0.7),
-        showSelectedLabels: false,
+        showSelectedLabels: true,
         showUnselectedLabels: false,
         type: BottomNavigationBarType.fixed,
         items: const [
@@ -127,11 +124,12 @@ class HealthScreen extends StatelessWidget {
     );
   }
 
+
   Widget _buildProgressBar() {
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: VivaBemColors.azulClaro.withOpacity(0.3),
+        color: VivaBemColors.azulMarinho.withOpacity(0.5), // MUDANÇA
         borderRadius: BorderRadius.circular(20),
       ),
       child: Stack(
@@ -141,7 +139,7 @@ class HealthScreen extends StatelessWidget {
               return Container(
                 width: constraints.maxWidth * (18 / 20),
                 decoration: BoxDecoration(
-                  color: VivaBemColors.laranjaPrimario,
+                  color: VivaBemColors.laranjaVibrante, // MUDANÇA
                   borderRadius: BorderRadius.circular(20),
                 ),
               );
@@ -168,10 +166,11 @@ class HealthScreen extends StatelessWidget {
     required BuildContext context,
     required Widget destinationPage,
   }) {
-    final Color iconColor = (color == VivaBemColors.botaoAmareloSol || color == VivaBemColors.cinzaClaro) 
-        ? VivaBemColors.cinzaEscuro
-        : VivaBemColors.branco;     
-        
+    // MUDANÇA: Lógica de contraste atualizada com o novo nome da cor
+    final Color iconColor = (color == VivaBemColors.amareloDourado)
+        ? VivaBemColors.cinzaEscuro // Ícone escuro para o fundo amarelo
+        : VivaBemColors.branco;     // Ícone branco para os demais fundos
+
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -189,7 +188,7 @@ class HealthScreen extends StatelessWidget {
           child: FaIcon(
             icon,
             size: 60,
-            color: iconColor, 
+            color: iconColor,
           ),
         ),
       ),
@@ -215,14 +214,14 @@ class DetailPage extends StatelessWidget {
         title: Text(
           title,
           style: TextStyle(
-            color: (backgroundColor == VivaBemColors.botaoAmareloSol || backgroundColor == VivaBemColors.azulClaro || backgroundColor == VivaBemColors.laranjaSuave || backgroundColor == VivaBemColors.botaoVerdeEsmeralda) 
+            color: (backgroundColor == VivaBemColors.amareloDourado || backgroundColor == VivaBemColors.azulRoyal || backgroundColor == VivaBemColors.laranjaVibrante || backgroundColor == VivaBemColors.verdeEsmeralda) 
                 ? VivaBemColors.cinzaEscuro 
                 : VivaBemColors.branco,
           ),
         ),
         backgroundColor: backgroundColor,
         iconTheme: IconThemeData(
-          color: (backgroundColor == VivaBemColors.botaoAmareloSol || backgroundColor == VivaBemColors.azulClaro || backgroundColor == VivaBemColors.laranjaSuave || backgroundColor == VivaBemColors.botaoVerdeEsmeralda) 
+          color: (backgroundColor == VivaBemColors.amareloDourado || backgroundColor == VivaBemColors.azulRoyal || backgroundColor == VivaBemColors.laranjaVibrante || backgroundColor == VivaBemColors.verdeEsmeralda) 
               ? VivaBemColors.cinzaEscuro 
               : VivaBemColors.branco,
         ),

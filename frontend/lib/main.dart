@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:projeto/screens/diario_bem_estar_screen.dart';
+import 'package:projeto/screens/wellness_diary_screen.dart';
 import 'package:projeto/screens/health_screen.dart';
 import 'screens/login_screen.dart';
 
