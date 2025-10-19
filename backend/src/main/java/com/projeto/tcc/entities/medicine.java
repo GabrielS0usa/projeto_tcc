@@ -4,36 +4,50 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
-import org.springframework.security.core.GrantedAuthority;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_medicine")
-public class medicine {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private String name;
-	private String dose;
-	private LocalTime hour_medicine;
-	private LocalDate date_medicine;
-	
-	public medicine() {
-	}
+public class Medicine {
 
-	public medicine(Long id, String name, String dose, LocalTime hour, LocalDate date) {
-		this.id = id;
-		this.name = name;
-		this.dose = dose;
-		this.hour_medicine = hour;
-		this.date_medicine = date;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    
+    private String dose;
+
+    private LocalTime startTime;
+
+    private Integer intervalHours;
+
+    private Integer durationDays;
+
+    private LocalDate startDate;
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    public Medicine() {}
+
+    public Medicine(Long id, String name, String dose, LocalTime startTime,
+                    Integer intervalHours, Integer durationDays, LocalDate startDate, String notes) {
+        this.id = id;
+        this.name = name;
+        this.dose = dose;
+        this.startTime = startTime;
+        this.intervalHours = intervalHours;
+        this.durationDays = durationDays;
+        this.startDate = startDate;
+    }
 
 	public Long getId() {
 		return id;
@@ -59,20 +73,44 @@ public class medicine {
 		this.dose = dose;
 	}
 
-	public LocalTime getHour() {
-		return hour_medicine;
+	public LocalTime getStartTime() {
+		return startTime;
 	}
 
-	public void setHour(LocalTime hour) {
-		this.hour_medicine = hour;
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
 	}
 
-	public LocalDate getDate() {
-		return date_medicine;
+	public Integer getIntervalHours() {
+		return intervalHours;
 	}
 
-	public void setDate(LocalDate date) {
-		this.date_medicine = date;
+	public void setIntervalHours(Integer intervalHours) {
+		this.intervalHours = intervalHours;
+	}
+
+	public Integer getDurationDays() {
+		return durationDays;
+	}
+
+	public void setDurationDays(Integer durationDays) {
+		this.durationDays = durationDays;
+	}
+
+	public LocalDate getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	@Override
@@ -88,7 +126,7 @@ public class medicine {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		medicine other = (medicine) obj;
+		Medicine other = (Medicine) obj;
 		return Objects.equals(id, other.id);
 	}
 }

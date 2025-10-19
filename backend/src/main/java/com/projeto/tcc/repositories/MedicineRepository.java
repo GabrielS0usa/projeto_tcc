@@ -1,10 +1,12 @@
 package com.projeto.tcc.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import com.projeto.tcc.entities.medicine;
+import com.projeto.tcc.entities.Medicine;
+import com.projeto.tcc.entities.User;
 
-@Repository
-public interface MedicineRepository extends JpaRepository<medicine, Long> {
+public interface MedicineRepository extends JpaRepository<Medicine, Long> {
+    List<Medicine> findByUserOrderByStartDateAscStartTimeAsc(User user);
 }
