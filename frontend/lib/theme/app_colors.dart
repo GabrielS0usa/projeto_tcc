@@ -22,8 +22,8 @@ class VivaBemColors {
   static const Color vermelhoErro = Color(0xFF9B0404);
 }
 
-class SaudePalete {
-  SaudePalete._();
+class HealthPalete {
+  HealthPalete._();
 
   static const Color vermelhoPrincipal = Color(0xDCDCDC05);
   static const Color azulSereno = Color(0xFF3E83B5);
@@ -31,8 +31,8 @@ class SaudePalete {
   static const Color amareloAgendado = Color(0xFFFFA65C);
 }
 
-class NutricaoPalete {
-  NutricaoPalete._();
+class NutritionPalete {
+  NutritionPalete._();
 
   static const Color laranjaPrincipal = Color(0xFFF07B53);
   static const Color azulHidratacao = Color(0xFF17A2B8);
@@ -40,8 +40,8 @@ class NutricaoPalete {
   static const Color amareloDourado = Color(0xFFF7B300);
 }
 
-class DiarioPalete {
-  DiarioPalete._();
+class DailyPalete {
+  DailyPalete._();
 
   static const Color amareloPrincipal = Color(0xFFF7E600);
   static const Color periodoAtivo = Color(0xFFFFA65C);

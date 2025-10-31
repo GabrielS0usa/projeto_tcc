@@ -105,7 +105,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                           }
                         });
                       },
-                      selectedColor: NutricaoPalete.amareloDourado,
+                      selectedColor: NutritionPalete.amareloDourado,
                       backgroundColor: VivaBemColors.cinzaEscuro.withRed(60),
                     );
                   }).toList(),
@@ -134,7 +134,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                         }
                         Navigator.pop(context);
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: NutricaoPalete.laranjaPrincipal),
+                      style: ElevatedButton.styleFrom(backgroundColor: NutritionPalete.laranjaPrincipal),
                       child: const Text("Salvar Refeição", style: TextStyle(color: VivaBemColors.cinzaClaro, fontWeight: FontWeight.bold)),
                     ),
                   )
@@ -179,7 +179,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
       backgroundColor: VivaBemColors.cinzaEscuro,
       appBar: AppBar(
         title: const Text('Meu Diário Nutricional'),
-        backgroundColor: NutricaoPalete.laranjaPrincipal,
+        backgroundColor: NutritionPalete.laranjaPrincipal,
         foregroundColor: VivaBemColors.branco,
       ),
       body: SingleChildScrollView(
@@ -220,7 +220,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
             Container(
               height: 30,
               decoration: BoxDecoration(
-                color: NutricaoPalete.azulHidratacao.withOpacity(0.3),
+                color: NutritionPalete.azulHidratacao.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Stack(
@@ -232,7 +232,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                         curve: Curves.easeOut,
                         width: constraints.maxWidth * progressValue,
                         decoration: BoxDecoration(
-                          color: NutricaoPalete.amareloDourado,
+                          color: NutritionPalete.amareloDourado,
                           borderRadius: BorderRadius.circular(15),
                         ),
                       );
@@ -264,7 +264,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
           children: [
             const Text(
               'Sua Hidratação Hoje',
-              style: TextStyle(color: NutricaoPalete.azulHidratacao, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: NutritionPalete.azulHidratacao, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -282,7 +282,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                   onTap: () => _logWater(index),
                   child: Icon(
                     isFilled ? FontAwesomeIcons.glassWater : FontAwesomeIcons.circle,
-                    color: isFilled ? NutricaoPalete.azulHidratacao : VivaBemColors.branco.withOpacity(0.3),
+                    color: isFilled ? NutritionPalete.azulHidratacao : VivaBemColors.branco.withOpacity(0.3),
                     size: 32,
                   ),
                 );
@@ -305,7 +305,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
           children: [
             const Text(
               'Suas Refeições do Dia',
-              style: TextStyle(color: NutricaoPalete.verdeFolha, fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(color: NutritionPalete.verdeFolha, fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             _buildMealTrackerRow(
@@ -343,7 +343,7 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
         leading: Icon(icon, color: VivaBemColors.branco.withOpacity(0.7), size: 30),
         title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
         subtitle: Text("Toque para registrar", style: TextStyle(color: Colors.white.withOpacity(0.5))),
-        trailing: Icon(Icons.add_circle, color: NutricaoPalete.amareloDourado, size: 36),
+        trailing: Icon(Icons.add_circle, color: NutritionPalete.amareloDourado, size: 36),
       );
     } else {
       // Estado "Registrado" com a lista de itens

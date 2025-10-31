@@ -3,156 +3,86 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:projeto/screens/health_mngment.dart';
 import 'package:projeto/screens/nutritional_diary_screen.dart';
 import 'package:projeto/screens/wellness_diary_screen.dart';
-import 'health_mngment.dart';
+import 'package:projeto/screens/stats_screen.dart';
+import 'package:projeto/screens/settings_screen.dart';
 import 'medicine_screen.dart';
 import '../theme/app_colors.dart';
+import '../models/user_profile.dart';
+import '../models/health_metrics.dart';
+import '../utils/color_utils.dart';
 
-class HealthScreen extends StatelessWidget {
+class HealthScreen extends StatefulWidget {
   const HealthScreen({Key? key}) : super(key: key);
 
   @override
+  State<HealthScreen> createState() => _HealthScreenState();
+}
+
+class _HealthScreenState extends State<HealthScreen> {
+  int _selectedIndex = 0;
+  late UserProfile _userProfile;
+  late HealthMetrics _healthMetrics;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  // Simulate loading user data (replace with actual API call in the future)
+  Future<void> _loadUserData() async {
+    setState(() => _isLoading = true);
+    
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    setState(() {
+      _userProfile = UserProfile.mock();
+      _healthMetrics = HealthMetrics.mock();
+      _isLoading = false;
+    });
+  }
+
+  void _onBottomNavTap(int index) {
+    setState(() => _selectedIndex = index);
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Show different screens based on bottom navigation selection
+    if (_selectedIndex == 1) {
+      return const StatsScreen();
+    } else if (_selectedIndex == 2) {
+      return const SettingsScreen();
+    }
+
+    // Main home screen
+    return _buildHomeScreen(context);
+  }
+
+  Widget _buildHomeScreen(BuildContext context) {
     return Scaffold(
       backgroundColor: VivaBemColors.cinzaEscuro,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Olá, Raimundo!',
-                style: TextStyle(
-                  color: VivaBemColors.branco,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'O seu progresso hoje:',
-                style: TextStyle(
-                  color: VivaBemColors.branco.withOpacity(0.8),
-                  fontSize: 20,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const SizedBox(height: 30),
-              _buildProgressBar(),
-              const SizedBox(height: 40),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 25,
-                  mainAxisSpacing: 25,
-                  childAspectRatio: 1.1,
-                  children: [
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.faceSmile,
-                      color: VivaBemColors.amareloDourado, // MUDANÇA
-                      context: context,
-                      destinationPage: const WellnessDiaryScreen(),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.heartPulse,
-                      color: VivaBemColors.vermelhoVibrante, // MUDANÇA
-                      context: context,
-                      destinationPage: const SaudeGestaoScreen(),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.brain,
-                      color: VivaBemColors.azulRoyal, // MUDANÇA
-                      context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Mente Ativa',
-                        backgroundColor: VivaBemColors.azulRoyal, // MUDANÇA
-                      ),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.dumbbell,
-                      color: VivaBemColors.rosaVibrante, // MUDANÇA
-                      context: context,
-                      destinationPage: const DetailPage(
-                        title: 'Exercícios',
-                        backgroundColor: VivaBemColors.rosaVibrante, // MUDANÇA
-                      ),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.plateWheat,
-                      color: VivaBemColors.laranjaVibrante, // MUDANÇA
-                      context: context,
-                      destinationPage: const NutricaoDiarioScreen(),
-                    ),
-                    _buildGridItem(
-                      icon: FontAwesomeIcons.pills,
-                      color: VivaBemColors.verdeEsmeralda, // MUDANÇA
-                      context: context,
-                      destinationPage: const MedicinesScreen(),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: VivaBemColors.azulMarinho, // MUDANÇA
-        selectedItemColor: VivaBemColors.amareloDourado, // MUDANÇA
-        unselectedItemColor: VivaBemColors.branco.withOpacity(0.7),
-        showSelectedLabels: true,
-        showUnselectedLabels: false,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home, size: 30),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart, size: 30),
-            label: 'Stats',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings, size: 30),
-            label: 'Settings',
-          ),
-        ],
-      ),
+      body: _isLoading ? _buildLoadingState() : _buildContent(context),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
-
-  Widget _buildProgressBar() {
-    return Container(
-      height: 40,
-      decoration: BoxDecoration(
-        color: VivaBemColors.azulMarinho.withOpacity(0.5), // MUDANÇA
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              return Container(
-                width: constraints.maxWidth * (18 / 20),
-                decoration: BoxDecoration(
-                  color: VivaBemColors.laranjaVibrante, // MUDANÇA
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              );
-            },
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(VivaBemColors.amareloDourado),
           ),
-          const Center(
-            child: Text(
-              '18 / 20',
-              style: TextStyle(
-                color: VivaBemColors.branco,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+          const SizedBox(height: 20),
+          Text(
+            'Carregando...',
+            style: TextStyle(
+              color: VivaBemColors.branco.withOpacity(0.7),
+              fontSize: 16,
             ),
           ),
         ],
@@ -160,16 +90,217 @@ class HealthScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildContent(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildGreeting(),
+            const SizedBox(height: 8),
+            _buildProgressLabel(),
+            const SizedBox(height: 30),
+            _buildProgressBar(),
+            const SizedBox(height: 40),
+            Expanded(
+              child: _buildHealthGrid(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGreeting() {
+    return Text(
+      'Olá, ${_userProfile.name}!',
+      style: TextStyle(
+        color: VivaBemColors.branco,
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Inter',
+      ),
+    );
+  }
+
+  Widget _buildProgressLabel() {
+    return Text(
+      'O seu progresso hoje:',
+      style: TextStyle(
+        color: VivaBemColors.branco.withOpacity(0.8),
+        fontSize: 20,
+        fontFamily: 'Inter',
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      backgroundColor: VivaBemColors.azulMarinho,
+      selectedItemColor: VivaBemColors.amareloDourado,
+      unselectedItemColor: VivaBemColors.branco.withOpacity(0.7),
+      currentIndex: _selectedIndex,
+      onTap: _onBottomNavTap,
+      showSelectedLabels: true,
+      showUnselectedLabels: false,
+      type: BottomNavigationBarType.fixed,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home, size: 30),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.bar_chart, size: 30),
+          label: 'Estatísticas',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.settings, size: 30),
+          label: 'Configurações',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHealthGrid(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 25,
+      mainAxisSpacing: 25,
+      childAspectRatio: 0.95,
+      children: [
+        _buildGridItem(
+          icon: FontAwesomeIcons.faceSmile,
+          label: 'Bem-Estar',
+          color: VivaBemColors.amareloDourado,
+          context: context,
+          destinationPage: const WellnessDiaryScreen(),
+        ),
+        _buildGridItem(
+          icon: FontAwesomeIcons.heartPulse,
+          label: 'Saúde',
+          color: VivaBemColors.vermelhoVibrante,
+          context: context,
+          destinationPage: const SaudeGestaoScreen(),
+        ),
+        _buildGridItem(
+          icon: FontAwesomeIcons.brain,
+          label: 'Mente Ativa',
+          color: VivaBemColors.azulRoyal,
+          context: context,
+          destinationPage: const DetailPage(
+            title: 'Mente Ativa',
+            backgroundColor: VivaBemColors.azulRoyal,
+          ),
+        ),
+        _buildGridItem(
+          icon: FontAwesomeIcons.dumbbell,
+          label: 'Exercícios',
+          color: VivaBemColors.rosaVibrante,
+          context: context,
+          destinationPage: const DetailPage(
+            title: 'Exercícios',
+            backgroundColor: VivaBemColors.rosaVibrante,
+          ),
+        ),
+        _buildGridItem(
+          icon: FontAwesomeIcons.plateWheat,
+          label: 'Nutrição',
+          color: VivaBemColors.laranjaVibrante,
+          context: context,
+          destinationPage: const NutricaoDiarioScreen(),
+        ),
+        _buildGridItem(
+          icon: FontAwesomeIcons.pills,
+          label: 'Medicamentos',
+          color: VivaBemColors.verdeEsmeralda,
+          context: context,
+          destinationPage: const MedicinesScreen(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProgressBar() {
+    final progress = _healthMetrics.progressPercentage;
+    final progressText = _healthMetrics.progressText;
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Tarefas de Saúde',
+              style: TextStyle(
+                color: VivaBemColors.branco.withOpacity(0.9),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              progressText,
+              style: TextStyle(
+                color: VivaBemColors.amareloDourado,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Container(
+          height: 40,
+          decoration: BoxDecoration(
+            color: VivaBemColors.azulMarinho.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Stack(
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 600),
+                    curve: Curves.easeInOut,
+                    width: constraints.maxWidth * progress,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          VivaBemColors.laranjaVibrante,
+                          VivaBemColors.amareloDourado,
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  );
+                },
+              ),
+              Center(
+                child: Text(
+                  progressText,
+                  style: const TextStyle(
+                    color: VivaBemColors.branco,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildGridItem({
     required IconData icon,
+    required String label,
     required Color color,
     required BuildContext context,
     required Widget destinationPage,
   }) {
-    // MUDANÇA: Lógica de contraste atualizada com o novo nome da cor
-    final Color iconColor = (color == VivaBemColors.amareloDourado)
-        ? VivaBemColors.cinzaEscuro // Ícone escuro para o fundo amarelo
-        : VivaBemColors.branco;     // Ícone branco para os demais fundos
+    final iconColor = ColorUtils.getIconColor(color);
 
     return InkWell(
       onTap: () {
@@ -183,13 +314,34 @@ class HealthScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: Center(
-          child: FaIcon(
-            icon,
-            size: 60,
-            color: iconColor,
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FaIcon(
+              icon,
+              size: 50,
+              color: iconColor,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: iconColor,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,28 +360,61 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final contentColor = ColorUtils.getAppBarContentColor(backgroundColor);
+
     return Scaffold(
       backgroundColor: VivaBemColors.cinzaEscuro,
       appBar: AppBar(
         title: Text(
           title,
           style: TextStyle(
-            color: (backgroundColor == VivaBemColors.amareloDourado || backgroundColor == VivaBemColors.azulRoyal || backgroundColor == VivaBemColors.laranjaVibrante || backgroundColor == VivaBemColors.verdeEsmeralda) 
-                ? VivaBemColors.cinzaEscuro 
-                : VivaBemColors.branco,
+            color: contentColor,
+            fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: backgroundColor,
-        iconTheme: IconThemeData(
-          color: (backgroundColor == VivaBemColors.amareloDourado || backgroundColor == VivaBemColors.azulRoyal || backgroundColor == VivaBemColors.laranjaVibrante || backgroundColor == VivaBemColors.verdeEsmeralda) 
-              ? VivaBemColors.cinzaEscuro 
-              : VivaBemColors.branco,
-        ),
+        iconTheme: IconThemeData(color: contentColor),
+        elevation: 0,
       ),
       body: Center(
-        child: Text(
-          'Página de $title',
-          style: const TextStyle(color: VivaBemColors.branco, fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(30),
+              decoration: BoxDecoration(
+                color: backgroundColor.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.construction,
+                size: 80,
+                color: backgroundColor,
+              ),
+            ),
+            const SizedBox(height: 30),
+            Text(
+              'Página de $title',
+              style: const TextStyle(
+                color: VivaBemColors.branco,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                'Esta funcionalidade está em desenvolvimento e estará disponível em breve.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: VivaBemColors.branco.withOpacity(0.7),
+                  fontSize: 16,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

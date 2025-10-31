@@ -74,7 +74,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
     return Scaffold(
       backgroundColor: VivaBemColors.cinzaEscuro,
       appBar: AppBar(
-        backgroundColor: DiarioPalete.amareloPrincipal,
+        backgroundColor: DailyPalete.amareloPrincipal,
         title: const Text(
           'Meu Diário de Bem-Estar',
           style: TextStyle(color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold),
@@ -143,21 +143,21 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
             color: isCompleted
                 ? VivaBemColors.verdeConfirmacao.withOpacity(0.2)
                 : isActive
-                    ? DiarioPalete.periodoAtivo.withOpacity(0.2)
+                    ? DailyPalete.periodoAtivo.withOpacity(0.2)
                     : Colors.transparent,
             border: Border.all(
               color: isCompleted
                   ? VivaBemColors.verdeConfirmacao
-                  : isActive ? DiarioPalete.periodoAtivo : inactiveColor,
+                  : isActive ? DailyPalete.periodoAtivo : inactiveColor,
               width: 2.5, // AUMENTADO: Borda mais espessa
             ),
           ),
           child: isCompleted
               ? Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 32) // AUMENTADO: Ícone maior
-              : Icon(icon, color: isActive ? DiarioPalete.periodoAtivo : inactiveColor, size: 32),
+              : Icon(icon, color: isActive ? DailyPalete.periodoAtivo : inactiveColor, size: 32),
         ),
         const SizedBox(height: 12),
-        Text(label, style: TextStyle(fontSize: 14, color: isCompleted ? VivaBemColors.verdeConfirmacao : isActive ? DiarioPalete.periodoAtivo : inactiveColor))
+        Text(label, style: TextStyle(fontSize: 14, color: isCompleted ? VivaBemColors.verdeConfirmacao : isActive ? DailyPalete.periodoAtivo : inactiveColor))
       ],
     );
   }
@@ -204,11 +204,11 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildHumorButton(Humor.ansioso, FontAwesomeIcons.faceTired, "Ansioso", DiarioPalete.corAnsioso),
-        _buildHumorButton(Humor.triste, FontAwesomeIcons.faceFrown, "Triste", DiarioPalete.corTriste),
-        _buildHumorButton(Humor.neutro, FontAwesomeIcons.faceMeh, "Neutro", DiarioPalete.corNeutro),
-        _buildHumorButton(Humor.calmo, FontAwesomeIcons.faceSmile, "Calmo", DiarioPalete.corCalmo),
-        _buildHumorButton(Humor.alegre, FontAwesomeIcons.faceLaughBeam, "Alegre", DiarioPalete.corAlegre),
+        _buildHumorButton(Humor.ansioso, FontAwesomeIcons.faceTired, "Ansioso", DailyPalete.corAnsioso),
+        _buildHumorButton(Humor.triste, FontAwesomeIcons.faceFrown, "Triste", DailyPalete.corTriste),
+        _buildHumorButton(Humor.neutro, FontAwesomeIcons.faceMeh, "Neutro", DailyPalete.corNeutro),
+        _buildHumorButton(Humor.calmo, FontAwesomeIcons.faceSmile, "Calmo", DailyPalete.corCalmo),
+        _buildHumorButton(Humor.alegre, FontAwesomeIcons.faceLaughBeam, "Alegre", DailyPalete.corAlegre),
       ],
     );
   }
@@ -266,13 +266,13 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: DiarioPalete.corCalmo, width: 2),
+                borderSide: BorderSide(color: DailyPalete.corCalmo, width: 2),
               ),
               suffixIcon: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(icon: Icon(Icons.mic, color: DiarioPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
-                  IconButton(icon: Icon(Icons.photo_camera, color: DiarioPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
+                  IconButton(icon: Icon(Icons.mic, color: DailyPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
+                  IconButton(icon: Icon(Icons.photo_camera, color: DailyPalete.corCalmo, size: 28), onPressed: () {/* TODO */}),
                 ],
               ),
             ),
@@ -281,7 +281,7 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
           ElevatedButton(
             onPressed: _salvarSentimento,
             style: ElevatedButton.styleFrom(
-              backgroundColor: DiarioPalete.amareloPrincipal,
+              backgroundColor: DailyPalete.amareloPrincipal,
               padding: const EdgeInsets.symmetric(vertical: 18), // AUMENTADO: Botão mais alto
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             ),

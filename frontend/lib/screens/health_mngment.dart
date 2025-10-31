@@ -71,7 +71,7 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
       appBar: AppBar(
         title: const Text('Minha Saúde'),
         // MUDANÇA: Usando a nova paleta
-        backgroundColor: SaudePalete.vermelhoPrincipal,
+        backgroundColor: HealthPalete.vermelhoPrincipal,
         foregroundColor: VivaBemColors.branco,
       ),
       body: SingleChildScrollView(
@@ -103,7 +103,7 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
         onPressed: () { /* TODO: Navegar para tela de adicionar compromisso */ },
         label: const Text('Adicionar'),
         icon: const Icon(Icons.add),
-        backgroundColor: SaudePalete.vermelhoPrincipal,
+        backgroundColor: HealthPalete.vermelhoPrincipal,
       ),
     );
   }
@@ -113,17 +113,17 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
     String countdownText = daysUntil == 0 ? 'É hoje!' : 'Consulta em $daysUntil dias';
 
     return Card(
-      color: SaudePalete.azulSereno.withOpacity(0.15),
+      color: HealthPalete.azulSereno.withOpacity(0.15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: SaudePalete.azulSereno.withOpacity(0.5)),
+        side: BorderSide(color: HealthPalete.azulSereno.withOpacity(0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('PRÓXIMO COMPROMISSO', style: TextStyle(color: SaudePalete.azulSereno, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+            Text('PRÓXIMO COMPROMISSO', style: TextStyle(color: HealthPalete.azulSereno, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
             const SizedBox(height: 12),
             Text(appointment.title, style: const TextStyle(color: VivaBemColors.branco, fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -157,15 +157,15 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
             defaultTextStyle: const TextStyle(color: VivaBemColors.branco),
             weekendTextStyle: TextStyle(color: VivaBemColors.branco.withOpacity(0.7)),
             todayDecoration: BoxDecoration(
-              color: SaudePalete.amareloAgendado.withOpacity(0.3),
+              color: HealthPalete.amareloAgendado.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             selectedDecoration: const BoxDecoration(
-              color: SaudePalete.laranjaCalendario,
+              color: HealthPalete.laranjaCalendario,
               shape: BoxShape.circle,
             ),
             markerDecoration: BoxDecoration(
-              color: SaudePalete.azulSereno,
+              color: HealthPalete.azulSereno,
               shape: BoxShape.circle,
             ),
           ),
@@ -190,7 +190,7 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
 
   Widget _buildAppointmentListItem(Appointment appointment) {
     IconData typeIcon = appointment.type == AppointmentType.consulta ? FontAwesomeIcons.stethoscope : FontAwesomeIcons.vial;
-    Color statusColor = appointment.isCompleted ? VivaBemColors.verdeConfirmacao : SaudePalete.amareloAgendado;
+    Color statusColor = appointment.isCompleted ? VivaBemColors.verdeConfirmacao : HealthPalete.amareloAgendado;
     String statusText = appointment.isCompleted ? "Realizado" : "Agendado";
 
     return Card(
