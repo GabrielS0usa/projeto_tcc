@@ -11,6 +11,7 @@ import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,6 +21,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 
@@ -38,8 +40,13 @@ public class User implements UserDetails {
     private String phone;
     private LocalDate birthDate;
     private String password;
-
-  
+    
+    @OneToMany(mappedBy = "user") 
+    private List<Activity> activities = new ArrayList<>();
+    
+    
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Consent consent;
     
     @ManyToMany
     @JoinTable(name = "tb_user_role",
@@ -111,8 +118,28 @@ public class User implements UserDetails {
 		this.roles = roles;
 	}
 	
+	public Set<Role> getRoles() {
+		return roles;
+	}
+	
 	public void addRole(Role role) {
     	roles.add(role);
+    }
+	
+	public Consent getConsent() {
+        return consent;
+    }
+
+    public void setConsent(Consent consent) {
+        this.consent = consent;
+    }
+
+    public List<Activity> getActivities() {
+        return activities;
+    }
+
+    public void setActivities(List<Activity> activities) {
+        this.activities = activities;
     }
     
     public boolean hasRole(String roleName) {

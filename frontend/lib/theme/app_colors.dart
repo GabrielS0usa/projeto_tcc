@@ -51,3 +51,12 @@ class DailyPalete {
   static const Color corCalmo = Color(0xFF6C8CDB);
   static const Color corAlegre = Color(0xFF4CAF50);
 }
+
+class MedicinePalete {
+  MedicinePalete._();
+
+  static const Color azulPrincipal = Color(0xFF3E83B5);
+  static const Color verdeStatusTomado = Color(0xFF4CAF50);
+  static const Color amareloLembrete = Color(0xFFF7B300);
+  static const Color cinzaStatusConcluido = Color(0xFF9E9E9E);
+}

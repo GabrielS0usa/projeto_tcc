@@ -1,14 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projeto/screens/health_mngment.dart';
+import 'package:projeto/screens/medicine_screen.dart';
 import 'package:projeto/screens/nutritional_diary_screen.dart';
-import 'package:projeto/screens/wellness_diary_screen.dart';
-import 'package:projeto/screens/stats_screen.dart';
 import 'package:projeto/screens/settings_screen.dart';
-import 'medicine_screen.dart';
+import 'package:projeto/screens/stats_screen.dart';
+import 'package:projeto/screens/wellness_diary_screen.dart';
+import 'package:projeto/screens/health_mngment.dart';
+import 'package:projeto/services/api_service.dart';
 import '../theme/app_colors.dart';
-import '../models/user_profile.dart';
-import '../models/health_metrics.dart';
 import '../utils/color_utils.dart';
 
 class HealthScreen extends StatefulWidget {
@@ -19,212 +20,253 @@ class HealthScreen extends StatefulWidget {
 }
 
 class _HealthScreenState extends State<HealthScreen> {
+  final ApiService _apiService = ApiService();
   int _selectedIndex = 0;
-  late UserProfile _userProfile;
-  late HealthMetrics _healthMetrics;
   bool _isLoading = true;
+  String _userName = "Usuário";
+  int _completedTasks = 0;
+  int _totalTasks = 10;
+  Timer? _updateTimer;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  // Simulate loading user data (replace with actual API call in the future)
-  Future<void> _loadUserData() async {
-    setState(() => _isLoading = true);
-    
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
-    
-    setState(() {
-      _userProfile = UserProfile.mock();
-      _healthMetrics = HealthMetrics.mock();
-      _isLoading = false;
+    _fetchDashboardData();
+    _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted && _selectedIndex == 0) {
+        _fetchDashboardData();
+      }
     });
   }
 
-  void _onBottomNavTap(int index) {
-    setState(() => _selectedIndex = index);
+  @override
+  void dispose() {
+    _updateTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchDashboardData() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+    });
+
+    String tempUserName = "Usuário";
+    int tempCompletedTasks = 0;
+    int tempTotalTasks = 1;
+
+    try {
+      final profileResponseFuture = _apiService.get('/user/profile');
+      final progressResponseFuture = _apiService.get('/user/progress/today');
+
+      final responses = await Future.wait([
+        profileResponseFuture,
+        progressResponseFuture,
+      ]);
+
+      if (!mounted) return;
+
+      if (responses[0].statusCode == 200) {
+        final profileData = jsonDecode(responses[0].body);
+        tempUserName = profileData['name'] ?? "Usuário";
+      } else {
+        _showError("Falha ao carregar perfil.");
+      }
+
+      if (responses[1].statusCode == 200) {
+        final progressData = jsonDecode(responses[1].body);
+        tempCompletedTasks = progressData['completed'] ?? 0;
+        tempTotalTasks = progressData['total'] ?? 1;
+        if (tempCompletedTasks == 0 && tempTotalTasks <= 1) {
+          tempCompletedTasks = 0;
+          tempTotalTasks = 0;
+        }
+      } else {
+        _showError("Falha ao carregar progresso.");
+      }
+    } catch (e) {
+      _showError('Erro de conexão: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _userName = tempUserName;
+          _completedTasks = tempCompletedTasks;
+          _totalTasks = tempTotalTasks;
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _onItemTapped(int index) {
+    if (_selectedIndex == index) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 0) {
+      _fetchDashboardData();
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: VivaBemColors.vermelhoErro,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Show different screens based on bottom navigation selection
-    if (_selectedIndex == 1) {
-      return const StatsScreen();
-    } else if (_selectedIndex == 2) {
-      return const SettingsScreen();
-    }
+    final List<Widget> widgetOptions = [
+      _buildHomeScreenContent(),
+      const StatsScreen(),
+      const SettingsScreen(),
+    ];
 
-    // Main home screen
-    return _buildHomeScreen(context);
-  }
-
-  Widget _buildHomeScreen(BuildContext context) {
     return Scaffold(
-      backgroundColor: VivaBemColors.cinzaEscuro,
-      body: _isLoading ? _buildLoadingState() : _buildContent(context),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(VivaBemColors.amareloDourado),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: widgetOptions,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: VivaBemColors.azulMarinho,
+        selectedItemColor: VivaBemColors.amareloDourado,
+        unselectedItemColor: VivaBemColors.branco.withOpacity(0.7),
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 30),
+            label: 'Home',
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Carregando...',
-            style: TextStyle(
-              color: VivaBemColors.branco.withOpacity(0.7),
-              fontSize: 16,
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart, size: 30),
+            label: 'Estatísticas',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings, size: 30),
+            label: 'Configurações',
           ),
         ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGreeting(),
-            const SizedBox(height: 8),
-            _buildProgressLabel(),
-            const SizedBox(height: 30),
-            _buildProgressBar(),
-            const SizedBox(height: 40),
-            Expanded(
-              child: _buildHealthGrid(context),
-            ),
-          ],
+  Widget _buildHomeScreenContent() {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: VivaBemColors.cinzaEscuro,
+        body: const Center(
+          child: CircularProgressIndicator(color: VivaBemColors.amareloDourado),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildGreeting() {
-    return Text(
-      'Olá, ${_userProfile.name}!',
-      style: TextStyle(
-        color: VivaBemColors.branco,
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        fontFamily: 'Inter',
-      ),
-    );
-  }
-
-  Widget _buildProgressLabel() {
-    return Text(
-      'O seu progresso hoje:',
-      style: TextStyle(
-        color: VivaBemColors.branco.withOpacity(0.8),
-        fontSize: 20,
-        fontFamily: 'Inter',
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      backgroundColor: VivaBemColors.azulMarinho,
-      selectedItemColor: VivaBemColors.amareloDourado,
-      unselectedItemColor: VivaBemColors.branco.withOpacity(0.7),
-      currentIndex: _selectedIndex,
-      onTap: _onBottomNavTap,
-      showSelectedLabels: true,
-      showUnselectedLabels: false,
-      type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home, size: 30),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bar_chart, size: 30),
-          label: 'Estatísticas',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings, size: 30),
-          label: 'Configurações',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildHealthGrid(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 25,
-      mainAxisSpacing: 25,
-      childAspectRatio: 0.95,
-      children: [
-        _buildGridItem(
-          icon: FontAwesomeIcons.faceSmile,
-          label: 'Bem-Estar',
-          color: VivaBemColors.amareloDourado,
-          context: context,
-          destinationPage: const WellnessDiaryScreen(),
-        ),
-        _buildGridItem(
-          icon: FontAwesomeIcons.heartPulse,
-          label: 'Saúde',
-          color: VivaBemColors.vermelhoVibrante,
-          context: context,
-          destinationPage: const SaudeGestaoScreen(),
-        ),
-        _buildGridItem(
-          icon: FontAwesomeIcons.brain,
-          label: 'Mente Ativa',
-          color: VivaBemColors.azulRoyal,
-          context: context,
-          destinationPage: const DetailPage(
-            title: 'Mente Ativa',
-            backgroundColor: VivaBemColors.azulRoyal,
+    return Scaffold(
+      backgroundColor: VivaBemColors.cinzaEscuro,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Olá, $_userName!',
+                style: const TextStyle(
+                  color: VivaBemColors.branco,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'O seu progresso hoje:',
+                style: TextStyle(
+                  color: VivaBemColors.branco.withOpacity(0.8),
+                  fontSize: 20,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 30),
+              _buildProgressBar(),
+              const SizedBox(height: 40),
+              Expanded(
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 25,
+                  mainAxisSpacing: 25,
+                  childAspectRatio: 0.95,
+                  children: [
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.faceSmile,
+                      label: 'Bem-Estar',
+                      color: VivaBemColors.amareloDourado,
+                      context: context,
+                      destinationPage: const WellnessDiaryScreen(),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.heartPulse,
+                      label: 'Saúde',
+                      color: VivaBemColors.vermelhoVibrante,
+                      context: context,
+                      destinationPage: const SaudeGestaoScreen(),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.brain,
+                      label: 'Mente Ativa',
+                      color: VivaBemColors.azulRoyal,
+                      context: context,
+                      destinationPage: const DetailPage(
+                        title: 'Mente Ativa',
+                        backgroundColor: VivaBemColors.azulRoyal,
+                      ),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.dumbbell,
+                      label: 'Exercícios',
+                      color: VivaBemColors.rosaVibrante,
+                      context: context,
+                      destinationPage: const DetailPage(
+                        title: 'Exercícios',
+                        backgroundColor: VivaBemColors.rosaVibrante,
+                      ),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.plateWheat,
+                      label: 'Nutrição',
+                      color: VivaBemColors.laranjaVibrante,
+                      context: context,
+                      destinationPage: const NutricaoDiarioScreen(),
+                    ),
+                    _buildGridItem(
+                      icon: FontAwesomeIcons.pills,
+                      label: 'Medicamentos',
+                      color: VivaBemColors.verdeEsmeralda,
+                      context: context,
+                      destinationPage: const MedicinesScreen(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-        _buildGridItem(
-          icon: FontAwesomeIcons.dumbbell,
-          label: 'Exercícios',
-          color: VivaBemColors.rosaVibrante,
-          context: context,
-          destinationPage: const DetailPage(
-            title: 'Exercícios',
-            backgroundColor: VivaBemColors.rosaVibrante,
-          ),
-        ),
-        _buildGridItem(
-          icon: FontAwesomeIcons.plateWheat,
-          label: 'Nutrição',
-          color: VivaBemColors.laranjaVibrante,
-          context: context,
-          destinationPage: const NutricaoDiarioScreen(),
-        ),
-        _buildGridItem(
-          icon: FontAwesomeIcons.pills,
-          label: 'Medicamentos',
-          color: VivaBemColors.verdeEsmeralda,
-          context: context,
-          destinationPage: const MedicinesScreen(),
-        ),
-      ],
+      ),
     );
   }
 
   Widget _buildProgressBar() {
-    final progress = _healthMetrics.progressPercentage;
-    final progressText = _healthMetrics.progressText;
-    
+    double progress = _totalTasks > 0 ? (_completedTasks / _totalTasks) : 0.0;
+    if (progress > 1.0) progress = 1.0;
+    if (progress < 0.0) progress = 0.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -240,8 +282,8 @@ class _HealthScreenState extends State<HealthScreen> {
               ),
             ),
             Text(
-              progressText,
-              style: TextStyle(
+              '$_completedTasks / $_totalTasks',
+              style: const TextStyle(
                 color: VivaBemColors.amareloDourado,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -256,37 +298,41 @@ class _HealthScreenState extends State<HealthScreen> {
             color: VivaBemColors.azulMarinho.withOpacity(0.5),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Stack(
-            children: [
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 600),
-                    curve: Curves.easeInOut,
-                    width: constraints.maxWidth * progress,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          VivaBemColors.laranjaVibrante,
-                          VivaBemColors.amareloDourado,
-                        ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeInOutCubic,
+                        width: constraints.maxWidth * progress,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              VivaBemColors.laranjaVibrante,
+                              VivaBemColors.amareloDourado,
+                            ],
+                          ),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  );
-                },
-              ),
-              Center(
-                child: Text(
-                  progressText,
+                    );
+                  },
+                ),
+                Text(
+                  '$_completedTasks / $_totalTasks',
                   style: const TextStyle(
                     color: VivaBemColors.branco,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -307,7 +353,9 @@ class _HealthScreenState extends State<HealthScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => destinationPage),
-        );
+        ).then((_) {
+          _fetchDashboardData();
+        });
       },
       borderRadius: BorderRadius.circular(20),
       child: Ink(
