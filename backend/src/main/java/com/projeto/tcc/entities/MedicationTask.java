@@ -12,9 +12,9 @@ public class MedicationTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "medicine_id")
-    private Medicine medicine; 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id", nullable = false) 
+    private Medicine medicine;
 
     private LocalDateTime scheduledTime; 
     private boolean taken; 

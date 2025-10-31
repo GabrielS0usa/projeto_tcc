@@ -2,52 +2,61 @@ package com.projeto.tcc.entities;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "tb_medicine")
 public class Medicine {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String name;
-    
-    private String dose;
+	private String name;
 
-    private LocalTime startTime;
+	private String dose;
 
-    private Integer intervalHours;
+	private LocalTime startTime;
 
-    private Integer durationDays;
+	private Integer intervalHours;
 
-    private LocalDate startDate;
-    
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+	private Integer durationDays;
 
-    public Medicine() {}
+	private LocalDate startDate;
 
-    public Medicine(Long id, String name, String dose, LocalTime startTime,
-                    Integer intervalHours, Integer durationDays, LocalDate startDate, String notes) {
-        this.id = id;
-        this.name = name;
-        this.dose = dose;
-        this.startTime = startTime;
-        this.intervalHours = intervalHours;
-        this.durationDays = durationDays;
-        this.startDate = startDate;
-    }
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
+	
+	@OneToMany(mappedBy = "medicine", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<MedicationTask> tasks = new ArrayList<>();
+
+	public Medicine() {
+	}
+
+	public Medicine(Long id, String name, String dose, LocalTime startTime, Integer intervalHours, Integer durationDays,
+			LocalDate startDate) { 
+		this.id = id;
+		this.name = name;
+		this.dose = dose;
+		this.startTime = startTime;
+		this.intervalHours = intervalHours;
+		this.durationDays = durationDays;
+		this.startDate = startDate;
+	}
 
 	public Long getId() {
 		return id;
@@ -111,6 +120,14 @@ public class Medicine {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public List<MedicationTask> getTasks() {
+	    return tasks;
+	}
+
+	public void setTasks(List<MedicationTask> tasks) {
+	    this.tasks = tasks;
 	}
 
 	@Override

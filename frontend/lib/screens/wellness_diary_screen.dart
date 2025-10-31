@@ -1,8 +1,8 @@
-// lib/screens/wellness_diary_screen.dart (ou o nome do seu arquivo)
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:intl/intl.dart';
+import 'package:projeto/services/api_service.dart';
 import '../theme/app_colors.dart';
 
 enum Humor { ansioso, triste, neutro, calmo, alegre }
@@ -18,6 +18,8 @@ class WellnessDiaryScreen extends StatefulWidget {
 
 class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
   Humor? _selectedHumor;
+  final ApiService _apiService = ApiService();
+  bool _isLoading = true;
   final TextEditingController _noteController = TextEditingController();
   PeriodoDia _currentPeriod = PeriodoDia.manha;
 
@@ -36,6 +38,31 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
   void initState() {
     super.initState();
     _determineCurrentPeriod();
+    _fetchTodayEntries();
+  }
+
+  Future<void> _fetchTodayEntries() async {
+    try {
+      final response = await _apiService.get('/wellness-diary/today');
+      if (response.statusCode == 200) {
+        final List<dynamic> entries = jsonDecode(response.body);
+        
+        Map<String, Humor> stringToHumor = {
+          for (var humor in Humor.values) humor.toString().split('.').last.toUpperCase(): humor
+        };
+
+        for (var entry in entries) {
+          final humor = stringToHumor[entry['mood']];
+          if (entry['period'] == 'MANHA') _registroManha = humor;
+          if (entry['period'] == 'TARDE') _registroTarde = humor;
+          if (entry['period'] == 'NOITE') _registroNoite = humor;
+        }
+      }
+    } catch (e) {
+      _showError("Não foi possível carregar seus registros de hoje.");
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
   }
 
   void _determineCurrentPeriod() {
@@ -52,23 +79,60 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
     }
   }
 
-  void _salvarSentimento() {
-    if (_selectedHumor == null) return;
+  void _showError(String message) {
+  if (!mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: VivaBemColors.vermelhoErro,
+    ),
+  );
+}
 
-    setState(() {
-      if (_currentPeriod == PeriodoDia.manha) _registroManha = _selectedHumor;
-      if (_currentPeriod == PeriodoDia.tarde) _registroTarde = _selectedHumor;
-      if (_currentPeriod == PeriodoDia.noite) _registroNoite = _selectedHumor;
-      _selectedHumor = null;
+  Future<void> _salvarSentimento() async {
+  if (_selectedHumor == null) return;
+
+  setState(() { _isLoading = true; });
+
+  try {
+    String humorString = _selectedHumor!.toString().split('.').last.toUpperCase();
+    String periodoString = _currentPeriod.toString().split('.').last.toUpperCase();
+
+    final response = await _apiService.post('/wellness-diary', {
+      'mood': humorString,
+      'period': periodoString,
+      'note': _noteController.text,
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Seu sentimento foi guardado com carinho!'),
-        backgroundColor: VivaBemColors.verdeConfirmacao,
-      ),
-    );
+    if (response.statusCode == 201) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Seu sentimento foi guardado com carinho!'),
+          backgroundColor: VivaBemColors.verdeConfirmacao,
+        ),
+      );
+
+      setState(() {
+        if (_currentPeriod == PeriodoDia.manha) _registroManha = _selectedHumor;
+        if (_currentPeriod == PeriodoDia.tarde) _registroTarde = _selectedHumor;
+        if (_currentPeriod == PeriodoDia.noite) _registroNoite = _selectedHumor;
+        _selectedHumor = null;
+        _noteController.clear();
+      });
+    } else {
+      final errorData = jsonDecode(response.body);
+      _showError(errorData['message'] ?? 'Falha ao salvar sentimento.');
+    }
+
+  } catch (e) {
+    _showError('Erro de conexão ao salvar.');
+  } finally {
+    if (mounted) {
+      setState(() { _isLoading = false; });
+    }
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -151,11 +215,11 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
               color: isCompleted
                   ? VivaBemColors.verdeConfirmacao
                   : isActive ? DiarioPalete.periodoAtivo : inactiveColor,
-              width: 2.5, // AUMENTADO: Borda mais espessa
+              width: 2.5, 
             ),
           ),
           child: isCompleted
-              ? Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 32) // AUMENTADO: Ícone maior
+              ? Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 32)
               : Icon(icon, color: isActive ? DiarioPalete.periodoAtivo : inactiveColor, size: 32),
         ),
         const SizedBox(height: 12),
@@ -281,14 +345,16 @@ class _WellnessDiaryScreenState extends State<WellnessDiaryScreen> {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _salvarSentimento,
+            onPressed: _isLoading ? null : _salvarSentimento,
             style: ElevatedButton.styleFrom(
               backgroundColor: DiarioPalete.amareloPrincipal,
-              padding: const EdgeInsets.symmetric(vertical: 18), // AUMENTADO: Botão mais alto
+              padding: const EdgeInsets.symmetric(vertical: 18), 
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             ),
-            child: const Text(
-              'Salvar Sentimento',
+            child: _isLoading 
+              ? const CircularProgressIndicator(color: VivaBemColors.cinzaEscuro)
+              : const Text(
+                  'Salvar Sentimento',
               style: TextStyle(fontSize: 20, color: VivaBemColors.cinzaEscuro, fontWeight: FontWeight.bold), 
             ),
           )
