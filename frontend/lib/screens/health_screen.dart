@@ -8,6 +8,8 @@ import 'package:projeto/screens/settings_screen.dart';
 import 'package:projeto/screens/stats_screen.dart';
 import 'package:projeto/screens/wellness_diary_screen.dart';
 import 'package:projeto/screens/health_mngment.dart';
+import 'package:projeto/screens/active_mind_screen.dart';
+import 'package:projeto/screens/physical_exercises_screen.dart';
 import 'package:projeto/services/api_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/color_utils.dart';
@@ -226,20 +228,14 @@ class _HealthScreenState extends State<HealthScreen> {
                   label: 'Mente Ativa',
                   color: VivaBemColors.azulRoyal,
                   context: context,
-                  destinationPage: const DetailPage(
-                    title: 'Mente Ativa',
-                    backgroundColor: VivaBemColors.azulRoyal,
-                  ),
+                  destinationPage: const ActiveMindScreen(),
                 ),
                 _buildGridItem(
                   icon: FontAwesomeIcons.dumbbell,
                   label: 'Exercícios',
                   color: VivaBemColors.rosaVibrante,
                   context: context,
-                  destinationPage: const DetailPage(
-                    title: 'Exercícios',
-                    backgroundColor: VivaBemColors.rosaVibrante,
-                  ),
+                  destinationPage: const PhysicalExercisesScreen(),
                 ),
                 _buildGridItem(
                   icon: FontAwesomeIcons.plateWheat,

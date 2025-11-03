@@ -60,3 +60,25 @@ class MedicinePalete {
   static const Color amareloLembrete = Color(0xFFF7B300);
   static const Color cinzaStatusConcluido = Color(0xFF9E9E9E);
 }
+
+class ActiveMindPalete {
+  ActiveMindPalete._();
+
+  static const Color azulPrincipal = Color(0xDF090FB5); // Blue Royal from main
+  static const Color roxoLeitura = Color(0xFF7B68EE); // Medium slate blue for reading
+  static const Color azulPalavrasCruzadas = Color(0xFF4169E1); // Royal blue for crosswords
+  static const Color rosaFilmes = Color(0xFFEE2C8A); // Pink for movies
+  static const Color verdeProgresso = Color(0xFF4CAF50); // Green for completion
+  static const Color amareloDestaque = Color(0xFFF7B300); // Yellow for highlights
+}
+
+class PhysicalExercisesPalete {
+  PhysicalExercisesPalete._();
+
+  static const Color rosaPrincipal = Color(0xFFEE2C8A); // Pink from main
+  static const Color laranjaCaminhada = Color(0xFFDC411E); // Orange for walking
+  static const Color verdeObjetivo = Color(0xFF4CAF50); // Green for goal completion
+  static const Color azulDistancia = Color(0xFF3E83B5); // Blue for distance
+  static const Color amareloTempo = Color(0xFFF7B300); // Yellow for time
+  static const Color roxoEnergia = Color(0xFF9B59B6); // Purple for energy
+}

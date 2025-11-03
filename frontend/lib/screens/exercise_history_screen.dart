@@ -1,0 +1,546 @@
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../theme/app_colors.dart';
+import '../models/physical_activity.dart';
+
+class ExerciseHistoryScreen extends StatefulWidget {
+  const ExerciseHistoryScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ExerciseHistoryScreen> createState() => _ExerciseHistoryScreenState();
+}
+
+class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
+  bool _isLoading = false;
+  DateTime _focusedDay = DateTime.now();
+  DateTime _selectedDay = DateTime.now();
+  List<WalkingSession> _sessions = [];
+  WeeklyExerciseSummary _weeklySummary = WeeklyExerciseSummary.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() => _isLoading = true);
+    
+    // TODO: Replace with actual API call
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    // Mock data
+    setState(() {
+      _sessions = [
+        WalkingSession(
+          id: '1',
+          startTime: DateTime.now().subtract(const Duration(hours: 2)),
+          endTime: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
+          durationMinutes: 30,
+          distanceKm: 2.5,
+          steps: 3200,
+          caloriesBurned: 120,
+        ),
+        WalkingSession(
+          id: '2',
+          startTime: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
+          endTime: DateTime.now().subtract(const Duration(days: 1, hours: 2, minutes: 15)),
+          durationMinutes: 45,
+          distanceKm: 3.8,
+          steps: 4800,
+          caloriesBurned: 180,
+        ),
+        WalkingSession(
+          id: '3',
+          startTime: DateTime.now().subtract(const Duration(days: 2, hours: 4)),
+          endTime: DateTime.now().subtract(const Duration(days: 2, hours: 3, minutes: 40)),
+          durationMinutes: 20,
+          distanceKm: 1.6,
+          steps: 2000,
+          caloriesBurned: 80,
+        ),
+      ];
+
+      _weeklySummary = WeeklyExerciseSummary(
+        totalSteps: 10000,
+        totalMinutes: 95,
+        totalCalories: 380,
+        activeDays: 3,
+        dailyGoals: [],
+      );
+
+      _isLoading = false;
+    });
+  }
+
+  List<WalkingSession> _getSessionsForDay(DateTime day) {
+    return _sessions.where((session) {
+      return isSameDay(session.startTime, day);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedDaySessions = _getSessionsForDay(_selectedDay);
+
+    return Scaffold(
+      backgroundColor: VivaBemColors.cinzaEscuro,
+      appBar: AppBar(
+        title: const Text(
+          'Histórico de Exercícios',
+          style: TextStyle(
+            color: VivaBemColors.branco,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        backgroundColor: PhysicalExercisesPalete.rosaPrincipal,
+        iconTheme: const IconThemeData(color: VivaBemColors.branco),
+        elevation: 0,
+      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                color: PhysicalExercisesPalete.rosaPrincipal,
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadHistory,
+              color: PhysicalExercisesPalete.rosaPrincipal,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWeeklySummary(),
+                    const SizedBox(height: 24),
+                    _buildCalendar(),
+                    const SizedBox(height: 24),
+                    _buildSelectedDayHeader(),
+                    const SizedBox(height: 16),
+                    if (selectedDaySessions.isEmpty)
+                      _buildEmptyState()
+                    else
+                      ...selectedDaySessions.map((session) => _buildSessionCard(session)),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+
+  Widget _buildWeeklySummary() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            PhysicalExercisesPalete.rosaPrincipal.withOpacity(0.3),
+            PhysicalExercisesPalete.roxoEnergia.withOpacity(0.2),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: PhysicalExercisesPalete.rosaPrincipal.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_month,
+                color: PhysicalExercisesPalete.amareloTempo,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Resumo Semanal',
+                style: TextStyle(
+                  color: VivaBemColors.branco,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildSummaryItem(
+                icon: Icons.directions_walk,
+                value: '${_weeklySummary.totalSteps}',
+                label: 'Passos',
+                color: PhysicalExercisesPalete.laranjaCaminhada,
+              ),
+              _buildSummaryItem(
+                icon: Icons.timer,
+                value: '${_weeklySummary.totalMinutes}min',
+                label: 'Tempo',
+                color: PhysicalExercisesPalete.amareloTempo,
+              ),
+              _buildSummaryItem(
+                icon: Icons.local_fire_department,
+                value: '${_weeklySummary.totalCalories}',
+                label: 'Calorias',
+                color: PhysicalExercisesPalete.rosaPrincipal,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: PhysicalExercisesPalete.verdeObjetivo.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: PhysicalExercisesPalete.verdeObjetivo,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: PhysicalExercisesPalete.verdeObjetivo,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '${_weeklySummary.activeDays} dias ativos esta semana',
+                  style: const TextStyle(
+                    color: VivaBemColors.branco,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, color: color, size: 28),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            color: color,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: VivaBemColors.branco.withOpacity(0.7),
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalendar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: VivaBemColors.cinzaEscuro.withRed(55),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: PhysicalExercisesPalete.rosaPrincipal.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: TableCalendar(
+          locale: 'pt_BR',
+          firstDay: DateTime.utc(2020, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          focusedDay: _focusedDay,
+          selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+          eventLoader: _getSessionsForDay,
+          calendarStyle: CalendarStyle(
+            defaultTextStyle: const TextStyle(color: VivaBemColors.branco),
+            weekendTextStyle: TextStyle(
+              color: VivaBemColors.branco.withOpacity(0.7),
+            ),
+            todayDecoration: BoxDecoration(
+              color: PhysicalExercisesPalete.amareloTempo.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            selectedDecoration: const BoxDecoration(
+              color: PhysicalExercisesPalete.rosaPrincipal,
+              shape: BoxShape.circle,
+            ),
+            markerDecoration: const BoxDecoration(
+              color: PhysicalExercisesPalete.verdeObjetivo,
+              shape: BoxShape.circle,
+            ),
+          ),
+          headerStyle: HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+            titleTextStyle: const TextStyle(
+              color: VivaBemColors.branco,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+            leftChevronIcon: const Icon(
+              Icons.chevron_left,
+              color: VivaBemColors.branco,
+            ),
+            rightChevronIcon: const Icon(
+              Icons.chevron_right,
+              color: VivaBemColors.branco,
+            ),
+          ),
+          daysOfWeekStyle: DaysOfWeekStyle(
+            weekdayStyle: TextStyle(
+              color: VivaBemColors.branco.withOpacity(0.7),
+            ),
+            weekendStyle: TextStyle(
+              color: VivaBemColors.branco.withOpacity(0.5),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedDayHeader() {
+    return Text(
+      'Atividades de ${DateFormat('d \'de\' MMMM', 'pt_BR').format(_selectedDay)}',
+      style: const TextStyle(
+        color: VivaBemColors.branco,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: VivaBemColors.branco.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: VivaBemColors.branco.withOpacity(0.2),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.event_busy,
+            size: 60,
+            color: VivaBemColors.branco.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhuma atividade neste dia',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: VivaBemColors.branco.withOpacity(0.7),
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSessionCard(WalkingSession session) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.5),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.directions_walk,
+                  color: PhysicalExercisesPalete.laranjaCaminhada,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Caminhada',
+                      style: TextStyle(
+                        color: VivaBemColors.branco,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      DateFormat('HH:mm').format(session.startTime),
+                      style: TextStyle(
+                        color: VivaBemColors.branco.withOpacity(0.7),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: PhysicalExercisesPalete.verdeObjetivo.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: PhysicalExercisesPalete.verdeObjetivo,
+                  ),
+                ),
+                child: Text(
+                  session.formattedDuration,
+                  style: const TextStyle(
+                    color: PhysicalExercisesPalete.verdeObjetivo,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSessionStat(
+                  icon: Icons.directions_walk,
+                  label: 'Passos',
+                  value: '${session.steps}',
+                  color: PhysicalExercisesPalete.laranjaCaminhada,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSessionStat(
+                  icon: Icons.straighten,
+                  label: 'Distância',
+                  value: session.formattedDistance,
+                  color: PhysicalExercisesPalete.azulDistancia,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSessionStat(
+                  icon: Icons.local_fire_department,
+                  label: 'Calorias',
+                  value: '${session.caloriesBurned}',
+                  color: PhysicalExercisesPalete.rosaPrincipal,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSessionStat(
+                  icon: Icons.speed,
+                  label: 'Ritmo',
+                  value: '${(session.distanceKm / (session.durationMinutes / 60)).toStringAsFixed(1)} km/h',
+                  color: PhysicalExercisesPalete.roxoEnergia,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSessionStat({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withOpacity(0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: VivaBemColors.branco.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
