@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('pt', 'BR'),
 
-      home: const HealthScreen(),
+      home: const LoginScreen(),
     );
   }
 }
