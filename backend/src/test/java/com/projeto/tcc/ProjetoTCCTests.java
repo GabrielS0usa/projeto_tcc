@@ -1,10 +1,10 @@
-package com.devsuperior.dscommerce;
+package com.projeto.tcc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class DscommerceApplicationTests {
+class ProjetoTCCTests {
 
 	@Test
 	void contextLoads() {

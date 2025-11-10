@@ -14,6 +14,4 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findByUserOrderByDateAsc(User user);
 
     List<Appointment> findByUserAndDateBetween(User user, LocalDateTime start, LocalDateTime end);
-
-	List<Appointment> findByUser(User user);
 }

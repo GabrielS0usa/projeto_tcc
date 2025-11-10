@@ -25,13 +25,13 @@ class Appointment {
     return Appointment(
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
-      type: json['type'] == 'EXAME' 
-          ? AppointmentType.exame 
+      type: json['type'] == 'EXAME'
+          ? AppointmentType.exame
           : AppointmentType.consulta,
       date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
       doctor: json['doctor'] ?? '',
       location: json['location'] ?? '',
-      isCompleted: json['completed'] ?? false,
+      isCompleted: json['isCompleted'] ?? false,
     );
   }
 
@@ -43,7 +43,7 @@ class Appointment {
       'date': date.toIso8601String(),
       'doctor': doctor,
       'location': location,
-      'completed': isCompleted,
+      'isCompleted': isCompleted, // ✅ campo alinhado com backend
     };
   }
 }

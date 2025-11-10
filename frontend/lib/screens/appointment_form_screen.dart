@@ -4,12 +4,10 @@ import 'package:projeto/services/api_service.dart';
 import '../theme/app_colors.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/appointment_model.dart'; // <-- 1. IMPORTA O MODELO CENTRAL
-
-// 2. AS DEFINIÇÕES LOCAIS DE 'AppointmentType' E 'Appointment' FORAM REMOVIDAS DAQUI
+import '../models/appointment_model.dart';
 
 class AppointmentFormScreen extends StatefulWidget {
-  final Appointment? appointment; // <-- 3. Agora usa o modelo importado
+  final Appointment? appointment;
 
   const AppointmentFormScreen({Key? key, this.appointment}) : super(key: key);
 
@@ -26,7 +24,7 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   late TextEditingController _doctorController;
   late TextEditingController _locationController;
   late DateTime _selectedDate;
-  AppointmentType _type = AppointmentType.consulta; // <-- 4. Agora usa o enum importado
+  AppointmentType _type = AppointmentType.consulta;
   bool _isCompleted = false;
 
   @override
@@ -35,7 +33,8 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
     final appointment = widget.appointment;
     _titleController = TextEditingController(text: appointment?.title ?? '');
     _doctorController = TextEditingController(text: appointment?.doctor ?? '');
-    _locationController = TextEditingController(text: appointment?.location ?? '');
+    _locationController =
+        TextEditingController(text: appointment?.location ?? '');
     _selectedDate = appointment?.date ?? DateTime.now();
     _type = appointment?.type ?? AppointmentType.consulta;
     _isCompleted = appointment?.isCompleted ?? false;
@@ -54,16 +53,17 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
   Future<void> _saveAppointment() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
-  
     final data = {
       'title': _titleController.text,
       'doctor': _doctorController.text,
       'location': _locationController.text,
       'type': _type == AppointmentType.exame ? 'EXAME' : 'CONSULTA',
       'date': _selectedDate.toIso8601String(),
-      'completed': _isCompleted,
+      'isCompleted': _isCompleted,
     };
 
     try {
@@ -72,7 +72,8 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       if (widget.appointment == null) {
         response = await _apiService.post('/appointments', data);
       } else {
-        response = await _apiService.put('/appointments/${widget.appointment!.id}', data);
+        response = await _apiService.put(
+            '/appointments/${widget.appointment!.id}', data);
       }
 
       if (!mounted) return;
@@ -87,7 +88,9 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       _showError('Erro de conexão: $e');
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -97,16 +100,20 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: VivaBemColors.cinzaEscuro,
-        title: const Text('Excluir compromisso', style: TextStyle(color: Colors.white)),
-        content: const Text('Tem certeza que deseja excluir este compromisso?', style: TextStyle(color: Colors.white70)),
+        title: const Text('Excluir compromisso',
+            style: TextStyle(color: Colors.white)),
+        content: const Text('Tem certeza que deseja excluir este compromisso?',
+            style: TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+            child:
+                const Text('Cancelar', style: TextStyle(color: Colors.white70)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Excluir', style: TextStyle(color: Colors.redAccent)),
+            child: const Text('Excluir',
+                style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -114,11 +121,14 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
 
     if (confirm != true) return;
 
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      final response = await _apiService.delete('/appointments/${widget.appointment!.id}');
-      
+      final response =
+          await _apiService.delete('/appointments/${widget.appointment!.id}');
+
       if (!mounted) return;
 
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -131,7 +141,9 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
       _showError('Erro de conexão: $e');
     } finally {
       if (mounted) {
-        setState(() { _isLoading = false; });
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -161,45 +173,79 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                controller: _titleController,
-                style: const TextStyle(color: VivaBemColors.branco),
-                decoration: const InputDecoration(labelText: 'Título'),
-                validator: (v) => v == null || v.isEmpty ? 'Informe o título' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _doctorController,
-                style: const TextStyle(color: VivaBemColors.branco),
-                decoration: const InputDecoration(labelText: 'Médico ou Clínica'),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _locationController,
-                style: const TextStyle(color: VivaBemColors.branco),
-                decoration: const InputDecoration(labelText: 'Local'),
-              ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<AppointmentType>(
-                value: _type,
-                items: const [
-                  DropdownMenuItem(value: AppointmentType.consulta, child: Text('Consulta')),
-                  DropdownMenuItem(value: AppointmentType.exame, child: Text('Exame')),
-                ],
-                onChanged: (v) => setState(() => _type = v!),
-                decoration: const InputDecoration(labelText: 'Tipo'),
+              Theme(
+                data: Theme.of(context).copyWith(
+                  inputDecorationTheme: const InputDecorationTheme(
+                    labelStyle: TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white38),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _titleController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Título'),
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Informe o título' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _doctorController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration:
+                          const InputDecoration(labelText: 'Médico ou Clínica'),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _locationController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(labelText: 'Local'),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<AppointmentType>(
+                      dropdownColor: VivaBemColors.cinzaEscuro,
+                      value: _type,
+                      items: const [
+                        DropdownMenuItem(
+                          value: AppointmentType.consulta,
+                          child: Text('Consulta',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                        DropdownMenuItem(
+                          value: AppointmentType.exame,
+                          child: Text('Exame',
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _type = v!),
+                      decoration: const InputDecoration(labelText: 'Tipo'),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(DateFormat('dd/MM/yyyy – HH:mm').format(_selectedDate),
-                    style: const TextStyle(color: Colors.white)),
+                title: Text(
+                  DateFormat('dd/MM/yyyy – HH:mm').format(_selectedDate),
+                  style: const TextStyle(color: Colors.white),
+                ),
                 trailing: const Icon(Icons.calendar_today, color: Colors.white),
                 onTap: () async {
                   final pickedDate = await showDatePicker(
                     context: context,
                     initialDate: _selectedDate,
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    firstDate:
+                        DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
                     locale: const Locale('pt', 'BR'),
                   );
@@ -224,7 +270,8 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
               ),
               const SizedBox(height: 12),
               SwitchListTile(
-                title: const Text('Marcar como realizado', style: TextStyle(color: Colors.white)),
+                title: const Text('Marcar como realizado',
+                    style: TextStyle(color: Colors.white)),
                 value: _isCompleted,
                 onChanged: (v) => setState(() => _isCompleted = v),
                 activeColor: HealthPalete.azulSereno,
@@ -232,11 +279,13 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _saveAppointment,
-                icon: _isLoading 
+                icon: _isLoading
                     ? Container(
-                        width: 24, height: 24, 
+                        width: 24,
+                        height: 24,
                         padding: const EdgeInsets.all(2.0),
-                        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                        child: const CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2))
                     : const Icon(Icons.save),
                 label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
                 style: ElevatedButton.styleFrom(
@@ -252,4 +301,3 @@ class _AppointmentFormScreenState extends State<AppointmentFormScreen> {
     );
   }
 }
-

@@ -30,16 +30,16 @@ class _HealthScreenState extends State<HealthScreen> {
   int _totalTasks = 10;
   Timer? _updateTimer;
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _fetchDashboardData();
-  //   _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-  //     if (mounted && _selectedIndex == 0) {
-  //       _fetchDashboardData();
-  //     }
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    _fetchDashboardData();
+    _updateTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+      if (mounted && _selectedIndex == 0) {
+        _fetchDashboardData();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -200,7 +200,6 @@ class _HealthScreenState extends State<HealthScreen> {
             _buildProgressBar(),
             const SizedBox(height: 40),
 
-            // Grid com shrinkWrap e rolagem desativada (ele rola junto com a tela)
             GridView.count(
               crossAxisCount: 2,
               crossAxisSpacing: 25,

@@ -129,7 +129,7 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
         onPressed: () => _addOrEditAppointment(),
         label: const Text('Adicionar'),
         icon: const Icon(Icons.add),
-        backgroundColor: HealthPalete.azulSereno, // Corrigido
+        backgroundColor: HealthPalete.azulSereno, 
       ),
     );
   }

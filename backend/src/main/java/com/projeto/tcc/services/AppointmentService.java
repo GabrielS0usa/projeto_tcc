@@ -31,9 +31,9 @@ public class AppointmentService {
 
 	@Transactional(readOnly = true)
 	public List<AppointmentDTO> findAll() {
-		User user = getCurrentUser();
-		List<Appointment> list = repository.findByUser(user);
-		return list.stream().map(AppointmentDTO::new).collect(Collectors.toList());
+	    User user = getCurrentUser();
+	    List<Appointment> list = repository.findByUserOrderByDateAsc(user); 
+	    return list.stream().map(AppointmentDTO::new).collect(Collectors.toList());
 	}
 
 	@Transactional
