@@ -1,4 +1,3 @@
-// lib/screens/medicines_screen.dart
 
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -7,7 +6,7 @@ import '../models/medication_task.dart';
 import '../services/api_service.dart';
 import 'add_medicine_screen.dart';
 import '../models/medicine_model.dart';
-import '../theme/app_colors.dart'; // <-- 1. IMPORTE SUA CLASSE DE CORES
+import '../theme/app_colors.dart'; 
 
 class MedicinesScreen extends StatefulWidget {
   const MedicinesScreen({Key? key}) : super(key: key);
@@ -64,7 +63,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
         {'taken': newState},
       );
 
-      if (response.statusCode != 201) {
+      if (response.statusCode != 200) {
         setState(() {
           task.taken = !newState;
         });
@@ -123,8 +122,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                SaudePalete.azulSereno, 
-                SaudePalete.azulSereno.withOpacity(0.7),
+                HealthPalete.azulSereno, 
+                HealthPalete.azulSereno.withOpacity(0.7),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -133,7 +132,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: SaudePalete.azulSereno))
+          ? const Center(child: CircularProgressIndicator(color: HealthPalete.azulSereno))
           : _tasks.isEmpty
             ? const Center(child: Text(
                 "Nenhum remédio agendado para hoje.",

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:projeto/screens/health_screen.dart';
 import 'screens/login_screen.dart';
 
 Future<void> main() async {

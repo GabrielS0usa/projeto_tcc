@@ -1,28 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:projeto/screens/appointment_form_screen.dart' hide Appointment, AppointmentType;
 import 'package:table_calendar/table_calendar.dart';
 import '../theme/app_colors.dart';
-
-enum AppointmentType { consulta, exame }
-
-class Appointment {
-  final String title;
-  final AppointmentType type;
-  final DateTime date;
-  final String doctor;
-  final String location;
-  bool isCompleted;
-
-  Appointment({
-    required this.title,
-    required this.type,
-    required this.date,
-    required this.doctor,
-    required this.location,
-    this.isCompleted = false,
-  });
-}
+import '../services/api_service.dart';
+import '../models/appointment_model.dart';
 
 class SaudeGestaoScreen extends StatefulWidget {
   const SaudeGestaoScreen({Key? key}) : super(key: key);
@@ -32,13 +16,9 @@ class SaudeGestaoScreen extends StatefulWidget {
 }
 
 class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
-  // Simulação de uma lista de compromissos (mantida)
-  final List<Appointment> _appointments = [
-    Appointment(title: 'Exame de Sangue', type: AppointmentType.exame, date: DateTime.now().add(const Duration(hours: 2)), doctor: 'Laboratório VivaBem', location: 'Unidade Centro', isCompleted: false),
-    Appointment(title: 'Cardiologista', type: AppointmentType.consulta, date: DateTime.now().add(const Duration(days: 3, hours: 4)), doctor: 'Dr. Carlos Andrade', location: 'Hospital Vida e Saúde'),
-    Appointment(title: 'Oftalmologista', type: AppointmentType.consulta, date: DateTime.now().subtract(const Duration(days: 10)), doctor: 'Dra. Lúcia', location: 'Clínica Visão Clara', isCompleted: true),
-    Appointment(title: 'Raio-X do Tórax', type: AppointmentType.exame, date: DateTime.now().add(const Duration(days: 15)), doctor: 'Radiologia Imagem', location: 'Hospital Vida e Saúde'),
-  ];
+  final ApiService _apiService = ApiService();
+  List<Appointment> _appointments = [];
+  bool _isLoading = true;
 
   late DateTime _focusedDay;
   late DateTime _selectedDay;
@@ -48,19 +28,55 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
     super.initState();
     _focusedDay = DateTime.now();
     _selectedDay = _focusedDay;
+    _fetchAppointments();
+  }
+
+  Future<void> _fetchAppointments() async {
+    try {
+      final response = await _apiService.get('/appointments');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          _appointments = data.map((e) => Appointment.fromJson(e)).toList();
+          _isLoading = false;
+        });
+      } else {
+        debugPrint('Erro ao buscar compromissos: ${response.statusCode}');
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      debugPrint('Erro na requisição: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _addOrEditAppointment({Appointment? existing}) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AppointmentFormScreen(appointment: existing),
+      ),
+    );
+
+    if (result == true) {
+      await _fetchAppointments();
+    }
   }
 
   List<Appointment> _getAppointmentsForDay(DateTime day) {
-    return _appointments.where((appointment) => isSameDay(appointment.date, day)).toList();
+    return _appointments.where((a) => isSameDay(a.date, day)).toList();
   }
-  
+
   Appointment? get _nextAppointment {
-    try {
-      return _appointments.where((a) => a.date.isAfter(DateTime.now()) && !a.isCompleted).first;
-    } catch (e) {
-      return null;
-    }
+    final now = DateTime.now();
+    final upcoming = _appointments
+        .where((a) => a.date.isAfter(now) && !a.isCompleted)
+        .toList();
+    if (upcoming.isEmpty) return null;
+    upcoming.sort((a, b) => a.date.compareTo(b.date));
+    return upcoming.first;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,66 +86,80 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
       backgroundColor: VivaBemColors.cinzaEscuro,
       appBar: AppBar(
         title: const Text('Minha Saúde'),
-        // MUDANÇA: Usando a nova paleta
-        backgroundColor: SaudePalete.vermelhoPrincipal,
+        backgroundColor: HealthPalete.vermelhoPrincipal,
         foregroundColor: VivaBemColors.branco,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (_nextAppointment != null) _buildUpcomingAppointmentCard(_nextAppointment!),
-            const SizedBox(height: 24),
-            _buildCalendarCard(),
-            const SizedBox(height: 24),
-            _buildAppointmentListHeader(),
-            const SizedBox(height: 16),
-            if (selectedDayAppointments.isEmpty)
-              _buildEmptyState()
-            else
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: selectedDayAppointments.length,
-                itemBuilder: (context, index) {
-                  return _buildAppointmentListItem(selectedDayAppointments[index]);
-                },
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: VivaBemColors.branco))
+          : RefreshIndicator(
+              onRefresh: _fetchAppointments,
+              color: HealthPalete.vermelhoPrincipal,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_nextAppointment != null) _buildUpcomingAppointmentCard(_nextAppointment!),
+                    const SizedBox(height: 24),
+                    _buildCalendarCard(),
+                    const SizedBox(height: 24),
+                    _buildAppointmentListHeader(),
+                    const SizedBox(height: 16),
+                    if (selectedDayAppointments.isEmpty)
+                      _buildEmptyState()
+                    else
+                      ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: selectedDayAppointments.length,
+                        itemBuilder: (context, index) {
+                          final appointment = selectedDayAppointments[index];
+                          return GestureDetector(
+                            onTap: () => _addOrEditAppointment(existing: appointment),
+                            child: _buildAppointmentListItem(appointment),
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ),
-          ],
-        ),
-      ),
+            ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () { /* TODO: Navegar para tela de adicionar compromisso */ },
+        onPressed: () => _addOrEditAppointment(),
         label: const Text('Adicionar'),
         icon: const Icon(Icons.add),
-        backgroundColor: SaudePalete.vermelhoPrincipal,
+        backgroundColor: HealthPalete.azulSereno, 
       ),
     );
   }
 
   Widget _buildUpcomingAppointmentCard(Appointment appointment) {
     final daysUntil = appointment.date.difference(DateTime.now()).inDays;
-    String countdownText = daysUntil == 0 ? 'É hoje!' : 'Consulta em $daysUntil dias';
+    final countdownText = daysUntil == 0 ? 'É hoje!' : 'Consulta em $daysUntil dias';
 
     return Card(
-      color: SaudePalete.azulSereno.withOpacity(0.15),
+      color: HealthPalete.azulSereno.withOpacity(0.15),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: BorderSide(color: SaudePalete.azulSereno.withOpacity(0.5)),
+        side: BorderSide(color: HealthPalete.azulSereno.withOpacity(0.5)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('PRÓXIMO COMPROMISSO', style: TextStyle(color: SaudePalete.azulSereno, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+            Text('PRÓXIMO COMPROMISSO',
+                style: TextStyle(color: HealthPalete.azulSereno, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
             const SizedBox(height: 12),
-            Text(appointment.title, style: const TextStyle(color: VivaBemColors.branco, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text(appointment.title,
+                style: const TextStyle(color: VivaBemColors.branco, fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(countdownText, style: const TextStyle(color: VivaBemColors.branco, fontSize: 18, fontStyle: FontStyle.italic)),
+            Text(countdownText,
+                style: const TextStyle(color: VivaBemColors.branco, fontSize: 18, fontStyle: FontStyle.italic)),
             const SizedBox(height: 8),
-            Text('${appointment.doctor} • ${appointment.location}', style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7), fontSize: 16)),
+            Text('${appointment.doctor} • ${appointment.location}',
+                style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7), fontSize: 16)),
           ],
         ),
       ),
@@ -148,24 +178,22 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
           lastDay: DateTime.utc(2030, 12, 31),
           focusedDay: _focusedDay,
           selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          onDaySelected: (selectedDay, focusedDay) => setState(() {
-            _selectedDay = selectedDay;
-            _focusedDay = focusedDay;
-          }),
+          onDaySelected: (selectedDay, focusedDay) =>
+              setState(() => {_selectedDay = selectedDay, _focusedDay = focusedDay}),
           eventLoader: _getAppointmentsForDay,
           calendarStyle: CalendarStyle(
             defaultTextStyle: const TextStyle(color: VivaBemColors.branco),
             weekendTextStyle: TextStyle(color: VivaBemColors.branco.withOpacity(0.7)),
             todayDecoration: BoxDecoration(
-              color: SaudePalete.amareloAgendado.withOpacity(0.3),
+              color: HealthPalete.amareloAgendado.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             selectedDecoration: const BoxDecoration(
-              color: SaudePalete.laranjaCalendario,
+              color: HealthPalete.laranjaCalendario,
               shape: BoxShape.circle,
             ),
             markerDecoration: BoxDecoration(
-              color: SaudePalete.azulSereno,
+              color: HealthPalete.azulSereno,
               shape: BoxShape.circle,
             ),
           ),
@@ -189,9 +217,11 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
   }
 
   Widget _buildAppointmentListItem(Appointment appointment) {
-    IconData typeIcon = appointment.type == AppointmentType.consulta ? FontAwesomeIcons.stethoscope : FontAwesomeIcons.vial;
-    Color statusColor = appointment.isCompleted ? VivaBemColors.verdeConfirmacao : SaudePalete.amareloAgendado;
-    String statusText = appointment.isCompleted ? "Realizado" : "Agendado";
+    final typeIcon =
+        appointment.type == AppointmentType.consulta ? FontAwesomeIcons.stethoscope : FontAwesomeIcons.vial;
+    final statusColor =
+        appointment.isCompleted ? VivaBemColors.verdeConfirmacao : HealthPalete.amareloAgendado;
+    final statusText = appointment.isCompleted ? "Realizado" : "Agendado";
 
     return Card(
       color: VivaBemColors.branco.withOpacity(0.05),
@@ -199,14 +229,17 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: ListTile(
         leading: Icon(typeIcon, color: statusColor, size: 28),
-        title: Text(appointment.title, style: const TextStyle(color: VivaBemColors.branco, fontWeight: FontWeight.bold, fontSize: 18)),
-        subtitle: Text('${appointment.doctor}\n${DateFormat('HH:mm').format(appointment.date)} • ${appointment.location}', style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7))),
+        title: Text(appointment.title,
+            style:
+                const TextStyle(color: VivaBemColors.branco, fontWeight: FontWeight.bold, fontSize: 18)),
+        subtitle: Text(
+            '${appointment.doctor}\n${DateFormat('HH:mm').format(appointment.date)} • ${appointment.location}',
+            style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7))),
         trailing: Chip(
           label: Text(statusText, style: const TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: statusColor.withOpacity(0.2),
           side: BorderSide(color: statusColor),
         ),
-        onTap: () { /* TODO */ },
       ),
     );
   }
@@ -224,3 +257,4 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
     );
   }
 }
+
