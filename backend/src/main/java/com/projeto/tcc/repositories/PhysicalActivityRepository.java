@@ -1,5 +1,6 @@
 package com.projeto.tcc.repositories;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,4 +25,6 @@ public interface PhysicalActivityRepository extends JpaRepository<PhysicalActivi
     
     @Query("SELECT COUNT(DISTINCT DATE(p.date)) FROM PhysicalActivityEntity p WHERE p.user = :user AND p.date >= :startDate")
     Long countActiveDaysByUserAndDate(User user, LocalDateTime startDate);
+
+	List<PhysicalActivityEntity> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
 }

@@ -50,14 +50,14 @@ class ApiService {
     return http.delete(url, headers: headers);
   }
 
-  // ==================== COGNITIVE ACTIVITIES ====================
+  Future<String?> _getUserId() async {
+  return await _storage.read(key: 'user_id');
+  }
 
-  // Statistics
   Future<http.Response> getCognitiveStats() async {
     return get('/cognitive-activities/stats');
   }
 
-  // Reading Activities
   Future<http.Response> getReadingActivities() async {
     return get('/cognitive-activities/reading');
   }
@@ -74,7 +74,6 @@ class ApiService {
     return delete('/cognitive-activities/reading/$id');
   }
 
-  // Crossword Activities
   Future<http.Response> getCrosswordActivities() async {
     return get('/cognitive-activities/crosswords');
   }
@@ -91,7 +90,6 @@ class ApiService {
     return delete('/cognitive-activities/crosswords/$id');
   }
 
-  // Movie Activities
   Future<http.Response> getMovieActivities() async {
     return get('/cognitive-activities/movies');
   }
@@ -108,11 +106,8 @@ class ApiService {
     return delete('/cognitive-activities/movies/$id');
   }
 
-  // ==================== PHYSICAL EXERCISES ====================
-
-  // Walking Sessions
-  Future<http.Response> startWalkingSession(Map<String, dynamic> data) async {
-    return post('/physical-exercises/walking/start', data);
+  Future<http.Response> startWalkingSession() async {
+  return post('/physical-exercises/walking/start', {});
   }
 
   Future<http.Response> endWalkingSession(int id, Map<String, dynamic> data) async {
@@ -135,7 +130,6 @@ class ApiService {
     return delete('/physical-exercises/walking/$id');
   }
 
-  // Physical Activities
   Future<http.Response> createPhysicalActivity(Map<String, dynamic> data) async {
     return post('/physical-exercises/activities', data);
   }
@@ -156,7 +150,6 @@ class ApiService {
     return delete('/physical-exercises/activities/$id');
   }
 
-  // Daily Exercise Goals
   Future<http.Response> getTodayExerciseGoal() async {
     return get('/physical-exercises/goals/today');
   }

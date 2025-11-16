@@ -31,15 +31,11 @@ public class CognitiveActivityController {
     @Autowired
     private CognitiveActivityService service;
 
-    // ==================== STATISTICS ====================
-
     @GetMapping("/stats")
     public ResponseEntity<CognitiveActivityStatsDTO> getStatistics() {
         CognitiveActivityStatsDTO stats = service.getStatistics();
         return ResponseEntity.ok(stats);
     }
-
-    // ==================== READING ACTIVITIES ====================
 
     @GetMapping("/reading")
     public ResponseEntity<List<ReadingActivityDTO>> findAllReadingActivities() {
@@ -67,8 +63,6 @@ public class CognitiveActivityController {
         return ResponseEntity.noContent().build();
     }
 
-    // ==================== CROSSWORD ACTIVITIES ====================
-
     @GetMapping("/crosswords")
     public ResponseEntity<List<CrosswordActivityDTO>> findAllCrosswordActivities() {
         List<CrosswordActivityDTO> list = service.findAllCrosswordActivities();
@@ -94,8 +88,6 @@ public class CognitiveActivityController {
         service.deleteCrosswordActivity(id);
         return ResponseEntity.noContent().build();
     }
-
-    // ==================== MOVIE ACTIVITIES ====================
 
     @GetMapping("/movies")
     public ResponseEntity<List<MovieActivityDTO>> findAllMovieActivities() {

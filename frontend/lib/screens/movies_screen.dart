@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:projeto/services/api_service.dart';
 import '../theme/app_colors.dart';
 import '../models/cognitive_activity.dart';
+
+import 'dart:convert';
+import '../services/api_service.dart';
+import 'package:http/http.dart' as http;
 
 class MoviesScreen extends StatefulWidget {
   const MoviesScreen({Key? key}) : super(key: key);
@@ -15,6 +20,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
   bool _isLoading = false;
   List<MovieActivity> _movies = [];
 
+  final ApiService _apiService = ApiService();
+
   @override
   void initState() {
     super.initState();
@@ -23,39 +30,40 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
   Future<void> _loadMovies() async {
     setState(() => _isLoading = true);
-    
-    // TODO: Replace with actual API call
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // Mock data
-    setState(() {
-      _movies = [
-        MovieActivity(
-          id: '1',
-          movieTitle: 'O Auto da Compadecida',
-          genre: 'Comédia',
-          rating: 5,
-          watchDate: DateTime.now(),
-          review: 'Filme maravilhoso! Ri muito com as aventuras de João Grilo.',
+
+    try {
+      final http.Response response = await _apiService.getMovieActivities();
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = jsonDecode(response.body);
+
+        setState(() {
+          _movies =
+              responseData.map((json) => MovieActivity.fromJson(json)).toList();
+          _isLoading = false;
+        });
+      } else {
+        print('Erro ao carregar dados: ${response.statusCode}');
+        print('Corpo: ${response.body}');
+        setState(() => _isLoading = false);
+        _showErrorSnackBar('Não foi possível carregar o histórico.');
+      }
+    } catch (e) {
+      print('Exceção ao carregar dados: $e');
+      setState(() => _isLoading = false);
+      _showErrorSnackBar('Erro de conexão. Tente novamente.');
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: VivaBemColors.vermelhoErro,
         ),
-        MovieActivity(
-          id: '2',
-          movieTitle: 'Central do Brasil',
-          genre: 'Drama',
-          rating: 5,
-          watchDate: DateTime.now().subtract(const Duration(days: 3)),
-          review: 'Emocionante! A história de Dora e Josué é tocante.',
-        ),
-        MovieActivity(
-          id: '3',
-          movieTitle: 'Cidade de Deus',
-          genre: 'Drama',
-          rating: 4,
-          watchDate: DateTime.now().subtract(const Duration(days: 7)),
-        ),
-      ];
-      _isLoading = false;
-    });
+      );
+    }
   }
 
   void _showAddDialog() {
@@ -69,7 +77,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: VivaBemColors.cinzaEscuro,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Text(
             'Adicionar Filme',
             style: TextStyle(
@@ -144,7 +153,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (movieTitleController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -155,30 +164,43 @@ class _MoviesScreenState extends State<MoviesScreen> {
                   return;
                 }
 
-                final newMovie = MovieActivity(
-                  id: DateTime.now().toString(),
-                  movieTitle: movieTitleController.text,
-                  genre: genreController.text.isEmpty ? null : genreController.text,
-                  rating: selectedRating,
-                  watchDate: DateTime.now(),
-                  review: reviewController.text.isEmpty ? null : reviewController.text,
-                );
+                final Map<String, dynamic> data = {
+                  'movieTitle': movieTitleController.text,
+                  'genre': genreController.text.isEmpty
+                      ? null
+                      : genreController.text,
+                  'rating': selectedRating,
+                  'watchDate': DateTime.now().toIso8601String(),
+                  'review': reviewController.text.isEmpty
+                      ? null
+                      : reviewController.text,
+                };
 
-                setState(() {
-                  _movies.insert(0, newMovie);
-                });
+                setState(() => _isLoading = true);
 
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Filme adicionado ao seu diário! 🎬'),
-                    backgroundColor: ActiveMindPalete.verdeProgresso,
-                  ),
-                );
+                final response = await _apiService.createMovieActivity(data);
+
+                if (response.statusCode == 201 || response.statusCode == 200) {
+                  Navigator.pop(context);
+                  _loadMovies(); 
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Filme salvo no servidor! 🎬'),
+                      backgroundColor: ActiveMindPalete.verdeProgresso,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(context);
+                  _showErrorSnackBar('Erro ao salvar filme no servidor.');
+                }
+
+                setState(() => _isLoading = false);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ActiveMindPalete.rosaFilmes,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -272,7 +294,8 @@ class _MoviesScreenState extends State<MoviesScreen> {
               color: ActiveMindPalete.rosaFilmes,
               child: Column(
                 children: [
-                  if (_movies.isNotEmpty) _buildStatsHeader(_movies.length, averageRating),
+                  if (_movies.isNotEmpty)
+                    _buildStatsHeader(_movies.length, averageRating),
                   Expanded(
                     child: _movies.isEmpty
                         ? _buildEmptyState()
@@ -456,10 +479,12 @@ class _MoviesScreenState extends State<MoviesScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: ActiveMindPalete.azulPrincipal.withOpacity(0.2),
+                          color:
+                              ActiveMindPalete.azulPrincipal.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: ActiveMindPalete.azulPrincipal.withOpacity(0.5),
+                            color:
+                                ActiveMindPalete.azulPrincipal.withOpacity(0.5),
                           ),
                         ),
                         child: Text(

@@ -16,25 +16,18 @@ public class DailyExerciseGoal {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
     private Integer targetSteps;
 
-    @Column(nullable = false)
     private Integer targetMinutes;
 
-    @Column(nullable = false)
     private Integer targetCalories;
 
-    @Column(nullable = false)
     private Integer currentSteps = 0;
 
-    @Column(nullable = false)
     private Integer currentMinutes = 0;
 
-    @Column(nullable = false)
     private Integer currentCalories = 0;
 
     public DailyExerciseGoal() {

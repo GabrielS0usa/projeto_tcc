@@ -16,28 +16,21 @@ public class WalkingSession {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
     private LocalDateTime startTime;
 
     @Column
     private LocalDateTime endTime;
 
-    @Column(nullable = false)
     private Integer durationMinutes;
 
-    @Column(nullable = false)
     private Double distanceKm;
 
-    @Column(nullable = false)
     private Integer steps;
 
-    @Column(nullable = false)
     private Integer caloriesBurned;
 
-    @Column(columnDefinition = "TEXT")
     private String notes;
 
-    @Column(nullable = false)
     private Boolean isActive = false;
 
     public WalkingSession() {

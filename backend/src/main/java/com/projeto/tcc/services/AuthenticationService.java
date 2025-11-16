@@ -51,10 +51,12 @@ public class AuthenticationService {
 	public LoginResponseDTO login(AuthenticationDTO data) {
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
 		var auth = this.authenticationManager.authenticate(usernamePassword);
-
+		
+		var user = (User) auth.getPrincipal();
 		var token = tokenService.generateToken((User) auth.getPrincipal());
-
-		return new LoginResponseDTO(token);
+		Long userId = user.getId();
+		
+		return new LoginResponseDTO(token, userId);
 	}
 
 	public UserMinDTO register(RegisterDTO data) {
