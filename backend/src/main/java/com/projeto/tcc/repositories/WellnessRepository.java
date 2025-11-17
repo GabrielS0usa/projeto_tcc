@@ -15,4 +15,7 @@ public interface WellnessRepository extends JpaRepository<Wellness, Long> {
     Optional<Wellness> findByUserAndEntryDateAndPeriod(User user, LocalDate entryDate, DayPeriod period);
     
     List<Wellness> findByUserAndEntryDate(User user, LocalDate entryDate);
+
+    List<Wellness> findByUserAndEntryDateBetween(User user, LocalDate start, LocalDate end);
+   
 }

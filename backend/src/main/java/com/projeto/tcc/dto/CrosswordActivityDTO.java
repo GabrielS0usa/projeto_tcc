@@ -11,6 +11,9 @@ import jakarta.validation.constraints.Pattern;
 
 public record CrosswordActivityDTO(
     Long id,
+
+    @NotNull(message = "O ID do usuário é obrigatório")
+    Long userId,
     
     @NotBlank(message = "O nome do quebra-cabeça é obrigatório")
     String puzzleName,
@@ -33,6 +36,7 @@ public record CrosswordActivityDTO(
     public CrosswordActivityDTO(CrosswordActivity entity) {
         this(
             entity.getId(),
+            entity.getUser().getId(),
             entity.getPuzzleName(),
             entity.getDifficulty(),
             entity.getDate(),

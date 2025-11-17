@@ -61,6 +61,25 @@ class _LoginScreenState extends State<LoginScreen> {
             'token'];
         await _storage.write(key: 'jwt_token', value: token);
 
+        String? userId;
+
+        if (responseBody.containsKey('user') &&
+            responseBody['user'] is Map &&
+            responseBody['user'].containsKey('id')) {
+          userId = responseBody['user']['id'].toString();
+        }
+
+        else if (responseBody.containsKey('userId')) {
+          userId = responseBody['userId'].toString();
+        }
+
+        if (userId == null || userId.isEmpty) {
+          throw Exception(
+              "Login successful but 'user.id' or 'userId' not found in response body.");
+        }
+
+        await _storage.write(key: 'user_id', value: userId);
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const HealthScreen()),

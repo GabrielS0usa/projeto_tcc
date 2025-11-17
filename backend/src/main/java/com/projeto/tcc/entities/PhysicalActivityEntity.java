@@ -138,4 +138,5 @@ public class PhysicalActivityEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

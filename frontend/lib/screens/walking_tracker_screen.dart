@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../theme/app_colors.dart';
 import '../models/physical_activity.dart';
+import '../services/api_service.dart';
+import 'dart:convert';
 
 class WalkingTrackerScreen extends StatefulWidget {
   const WalkingTrackerScreen({Key? key}) : super(key: key);
@@ -12,6 +14,9 @@ class WalkingTrackerScreen extends StatefulWidget {
 }
 
 class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
+  final ApiService _apiService = ApiService();
+  bool _isLoadingApi = false;
+
   bool _isTracking = false;
   bool _isPaused = false;
   Timer? _timer;
@@ -20,29 +25,59 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
   double _distanceKm = 0.0;
   int _calories = 0;
 
+  int? _activeSessionId;
+
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
-  void _startTracking() {
-    setState(() {
-      _isTracking = true;
-      _isPaused = false;
-    });
+  Future<void> _startTracking() async {
+    setState(() => _isLoadingApi = true);
 
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        _seconds++;
-        // Simulate step counting (in real app, use pedometer sensor)
-        if (_seconds % 2 == 0) {
-          _steps += 2;
-          _distanceKm = _steps * 0.0008; // Approximate: 1 step ≈ 0.8m
-          _calories = (_steps * 0.04).round(); // Approximate: 1 step ≈ 0.04 cal
-        }
-      });
-    });
+    try {
+      final response = await _apiService.startWalkingSession();
+
+      if (response.statusCode == 201) {
+        final responseData = jsonDecode(utf8.decode(response.bodyBytes));
+
+        setState(() {
+          _activeSessionId = responseData['id'];
+          _isTracking = true;
+          _isPaused = false;
+          _isLoadingApi = false;
+        });
+
+        _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+          setState(() {
+            _seconds++;
+            if (_seconds % 2 == 0) {
+              _steps += 2;
+              _distanceKm = _steps * 0.0008;
+              _calories = (_steps * 0.04).round();
+            }
+          });
+        });
+      } else {
+        setState(() => _isLoadingApi = false);
+        _showErrorSnackBar('Erro ao iniciar caminhada: ${response.body}');
+      }
+    } catch (e) {
+      setState(() => _isLoadingApi = false);
+      _showErrorSnackBar('Erro de conexão: $e');
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: VivaBemColors.vermelhoErro,
+        ),
+      );
+    }
   }
 
   void _pauseTracking() {
@@ -72,13 +107,11 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
   void _stopTracking() {
     _timer?.cancel();
 
-    if (_seconds < 60) {
-      // Too short, just cancel
+    if (_seconds < 1) {
       Navigator.pop(context);
       return;
     }
 
-    // Show summary dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -86,14 +119,14 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
         backgroundColor: VivaBemColors.cinzaEscuro,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
-          children: [
+          children: const [
             Icon(
               Icons.emoji_events,
               color: PhysicalExercisesPalete.amareloTempo,
               size: 32,
             ),
-            const SizedBox(width: 12),
-            const Text(
+            SizedBox(width: 12),
+            Text(
               'Parabéns!',
               style: TextStyle(
                 color: VivaBemColors.branco,
@@ -146,15 +179,39 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
         ),
         actions: [
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Return to previous screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Caminhada salva com sucesso! 🎉'),
-                  backgroundColor: PhysicalExercisesPalete.verdeObjetivo,
-                ),
-              );
+            onPressed: () async {
+              if (_activeSessionId == null) return;
+
+              final data = {
+                'durationMinutes': (_seconds / 60).round(),
+                'steps': _steps,
+                'distanceKm': _distanceKm,
+                'caloriesBurned': _calories,
+              };
+
+              try {
+                final response = await _apiService.endWalkingSession(
+                  _activeSessionId!,
+                  data,
+                );
+
+                if (response.statusCode == 200) {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Caminhada salva com sucesso! 🎉'),
+                      backgroundColor: PhysicalExercisesPalete.verdeObjetivo,
+                    ),
+                  );
+                } else {
+                  Navigator.pop(context);
+                  _showErrorSnackBar('Erro ao salvar: ${response.body}');
+                }
+              } catch (e) {
+                Navigator.pop(context);
+                _showErrorSnackBar('Erro de conexão: $e');
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: PhysicalExercisesPalete.verdeObjetivo,
@@ -241,58 +298,35 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
     return WillPopScope(
       onWillPop: () async {
         if (_isTracking && !_isPaused) {
-          // Show confirmation dialog
           final shouldPop = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              backgroundColor: VivaBemColors.cinzaEscuro,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: const Text(
-                'Cancelar Caminhada?',
-                style: TextStyle(
-                  color: VivaBemColors.branco,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              title: const Text('Cancelar Caminhada?'),
               content: const Text(
-                'Você tem certeza que deseja cancelar? Seu progresso será perdido.',
-                style: TextStyle(
-                  color: VivaBemColors.branco,
-                  fontSize: 18,
-                ),
-              ),
+                  'Se você sair agora, a caminhada em andamento será perdida.'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text(
-                    'Continuar',
-                    style: TextStyle(
-                      color: VivaBemColors.branco,
-                      fontSize: 18,
-                    ),
-                  ),
+                  child: const Text('Continuar'),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, true),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: VivaBemColors.vermelhoErro,
-                  ),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(
-                      color: VivaBemColors.branco,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text('Cancelar Caminhada'),
                 ),
               ],
             ),
           );
-          return shouldPop ?? false;
+
+          if (shouldPop ?? false) {
+            _timer?.cancel();
+            if (_activeSessionId != null) {
+              try {
+                _apiService.deleteWalkingSession(_activeSessionId!);
+              } catch (_) {}
+            }
+            return true;
+          }
+          return false;
         }
         return true;
       },
@@ -356,7 +390,8 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
                 Icon(
                   Icons.map,
                   size: 80,
-                  color: PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.5),
+                  color:
+                      PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.5),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -383,7 +418,8 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
               top: 16,
               right: 16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: PhysicalExercisesPalete.verdeObjetivo,
                   borderRadius: BorderRadius.circular(20),
@@ -452,7 +488,11 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            _isPaused ? 'Pausado' : _isTracking ? 'Em Andamento' : 'Pronto para Começar',
+            _isPaused
+                ? 'Pausado'
+                : _isTracking
+                    ? 'Em Andamento'
+                    : 'Pronto para Começar',
             style: TextStyle(
               color: VivaBemColors.branco.withOpacity(0.8),
               fontSize: 18,
@@ -503,7 +543,9 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
               child: _buildStatCard(
                 icon: Icons.speed,
                 label: 'Ritmo',
-                value: _seconds > 0 ? '${(_distanceKm / (_seconds / 3600)).toStringAsFixed(1)} km/h' : '0.0 km/h',
+                value: _seconds > 0
+                    ? '${(_distanceKm / (_seconds / 3600)).toStringAsFixed(1)} km/h'
+                    : '0.0 km/h',
                 color: PhysicalExercisesPalete.roxoEnergia,
               ),
             ),
@@ -571,14 +613,12 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           if (_isTracking) ...[
-            // Pause/Resume button
             _buildControlButton(
               icon: _isPaused ? Icons.play_arrow : Icons.pause,
               label: _isPaused ? 'Retomar' : 'Pausar',
               color: PhysicalExercisesPalete.amareloTempo,
               onPressed: _isPaused ? _resumeTracking : _pauseTracking,
             ),
-            // Stop button
             _buildControlButton(
               icon: Icons.stop,
               label: 'Parar',
@@ -586,10 +626,9 @@ class _WalkingTrackerScreenState extends State<WalkingTrackerScreen> {
               onPressed: _stopTracking,
             ),
           ] else ...[
-            // Start button
             Expanded(
               child: ElevatedButton(
-                onPressed: _startTracking,
+                onPressed: _isLoadingApi ? null : _startTracking,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PhysicalExercisesPalete.verdeObjetivo,
                   padding: const EdgeInsets.symmetric(vertical: 20),
