@@ -11,7 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.projeto.tcc.dto.DailyReportRequestDTO;
+import com.projeto.tcc.dto.GeminiReportResponse;
 import com.projeto.tcc.dto.WellnessEntryDTO;
+import com.projeto.tcc.services.GeminiServiceNew;
 import com.projeto.tcc.services.WellnessService;
 
 import jakarta.validation.Valid;
@@ -22,6 +25,12 @@ public class WellnessController {
 
     @Autowired
     private WellnessService service;
+    
+    @Autowired
+    private GeminiServiceNew geminiService;
+    
+    @Autowired
+    private WellnessService wellnessService;
 
     @PostMapping
     public ResponseEntity<Void> save(@RequestBody @Valid WellnessEntryDTO dto) {
@@ -34,4 +43,15 @@ public class WellnessController {
         List<WellnessEntryDTO> entries = service.findTodayEntries();
         return ResponseEntity.ok(entries);
     }
+    
+    @PostMapping("/daily-report")
+    public ResponseEntity<GeminiReportResponse> generateDailyReport(@RequestBody @Valid DailyReportRequestDTO dto) {
+        GeminiReportResponse report = wellnessService.generateAndProcessDailyReport(
+            dto.getUserId(), 
+            dto.getDate()
+        );
+
+        return ResponseEntity.ok(report);
+    }
+
 }

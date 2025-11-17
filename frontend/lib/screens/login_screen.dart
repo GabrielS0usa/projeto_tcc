@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final String baseUrl = dotenv.env['API_BASE_URL']!;
 
       final url = Uri.parse('$baseUrl/auth/login');
- 
+
       final response = await http.post(
         url,
         headers: {
@@ -54,31 +54,20 @@ class _LoginScreenState extends State<LoginScreen> {
           "password": _passwordController.text,
         }),
       );
-      
+
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        final token = responseBody[
-            'token'];
-        await _storage.write(key: 'jwt_token', value: token);
 
-        String? userId;
+        final token = responseBody['token'];
+        final userId = responseBody['userId'];
 
-        if (responseBody.containsKey('user') &&
-            responseBody['user'] is Map &&
-            responseBody['user'].containsKey('id')) {
-          userId = responseBody['user']['id'].toString();
-        }
-
-        else if (responseBody.containsKey('userId')) {
-          userId = responseBody['userId'].toString();
-        }
-
-        if (userId == null || userId.isEmpty) {
+        if (token == null || userId == null) {
           throw Exception(
-              "Login successful but 'user.id' or 'userId' not found in response body.");
+              "Resposta inválida do servidor: token ou userId ausentes.");
         }
 
-        await _storage.write(key: 'user_id', value: userId);
+        await _storage.write(key: 'jwt_token', value: token);
+        await _storage.write(key: 'userId', value: userId.toString());
 
         Navigator.pushReplacement(
           context,
@@ -124,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
         color: const Color(0xFF1F1F2F),
         child: SafeArea(
           child: Center(
-            child: Image.asset('assets/images/velinho_azul.png', height: 150),
+            child: Image.asset('assets/images/bem.png', height: 250),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 package com.projeto.tcc.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,15 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.projeto.tcc.entities.Medicine;
-import com.projeto.tcc.entities.PhysicalActivityEntity;
-import com.projeto.tcc.entities.User;
-import com.projeto.tcc.entities.Wellness;
-import com.projeto.tcc.repositories.MedicineRepository;
-import com.projeto.tcc.repositories.PhysicalActivityRepository;
-import com.projeto.tcc.repositories.ReadingActivityRepository;
-import com.projeto.tcc.repositories.UserRepository;
-import com.projeto.tcc.repositories.WellnessRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.projeto.tcc.dto.DailyDataBundle;
+import com.projeto.tcc.dto.GeminiReportResponse;
+import com.projeto.tcc.entities.*;
+import com.projeto.tcc.repositories.*;
 import com.projeto.tcc.services.exceptions.ResourceNotFoundException;
 
 @Service

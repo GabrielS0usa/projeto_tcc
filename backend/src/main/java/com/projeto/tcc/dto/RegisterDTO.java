@@ -10,7 +10,7 @@ public record RegisterDTO(
         String phone, 
         @NotBlank(message = "Data de nascimento é obrigatória") String birthDate,
         @NotBlank(message = "Senha é obrigatória") String password,
-
-        @Email(message = "Email do cuidador inválido") String caregiverEmail, 
-        String caregiverName 
+        String caregiverName,
+        @Email(message = "Email do cuidador inválido") String caregiverEmail 
+        
 ) {}
