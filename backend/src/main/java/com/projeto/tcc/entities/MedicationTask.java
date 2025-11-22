@@ -12,7 +12,7 @@ public class MedicationTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "medicine_id", nullable = false) 
     private Medicine medicine;
 

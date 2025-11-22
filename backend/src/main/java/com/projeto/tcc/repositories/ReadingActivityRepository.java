@@ -1,5 +1,6 @@
 package com.projeto.tcc.repositories;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,8 @@ public interface ReadingActivityRepository extends JpaRepository<ReadingActivity
     List<ReadingActivity> findByUserOrderByStartDateDesc(User user);
     
     List<ReadingActivity> findByUserAndIsCompletedOrderByStartDateDesc(User user, Boolean isCompleted);
+    
+    List<ReadingActivity> findByUserAndStartDate(User user, LocalDate startDate);
     
     @Query("SELECT COUNT(r) FROM ReadingActivity r WHERE r.user = :user AND r.isCompleted = true")
     Long countCompletedByUser(User user);

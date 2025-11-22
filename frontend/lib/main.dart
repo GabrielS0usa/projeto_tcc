@@ -12,7 +12,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,11 @@ class MyApp extends StatelessWidget {
       ],
       locale: const Locale('pt', 'BR'),
 
-      home: const LoginScreen(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/health': (context) => const HealthScreen(),
+      },
     );
   }
 }

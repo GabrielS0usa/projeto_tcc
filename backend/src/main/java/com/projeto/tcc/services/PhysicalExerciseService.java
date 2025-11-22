@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.projeto.tcc.dto.DailyExerciseGoalDTO;
 import com.projeto.tcc.dto.PhysicalActivityDTO;
 import com.projeto.tcc.dto.WalkingSessionDTO;
+import com.projeto.tcc.dto.WalkingStartDTO;
 import com.projeto.tcc.dto.WeeklyExerciseSummaryDTO;
 import com.projeto.tcc.entities.DailyExerciseGoal;
 import com.projeto.tcc.entities.PhysicalActivityEntity;
@@ -48,23 +49,26 @@ public class PhysicalExerciseService {
     // ==================== Walking Session Methods ====================
 
     @Transactional
-    public WalkingSessionDTO startWalkingSession(WalkingSessionDTO dto) {
+    public WalkingStartDTO startWalkingSession() {
         User user = getCurrentUser();
-
-        // Check if there's already an active session
+        
         walkingSessionRepository.findByUserAndIsActiveTrue(user)
                 .ifPresent(session -> {
                     throw new IllegalStateException("Já existe uma sessão de caminhada ativa");
                 });
 
         WalkingSession entity = new WalkingSession();
-        copyWalkingDtoToEntity(dto, entity);
         entity.setUser(user);
         entity.setIsActive(true);
         entity.setStartTime(LocalDateTime.now());
-
+        entity.setDurationMinutes(0);
+        entity.setDistanceKm(0.0);
+        entity.setSteps(0);
+        entity.setCaloriesBurned(0);
         entity = walkingSessionRepository.save(entity);
-        return new WalkingSessionDTO(entity);
+        
+        
+        return new WalkingStartDTO(entity.getId(),entity.getStartTime());
     }
 
     @Transactional
@@ -319,17 +323,6 @@ public class PhysicalExerciseService {
         goal.setCurrentCalories(goal.getCurrentCalories() + activity.getCaloriesBurned());
 
         dailyExerciseGoalRepository.save(goal);
-    }
-
-    private void copyWalkingDtoToEntity(WalkingSessionDTO dto, WalkingSession entity) {
-        if (dto.startTime() != null) entity.setStartTime(dto.startTime());
-        if (dto.endTime() != null) entity.setEndTime(dto.endTime());
-        if (dto.durationMinutes() != null) entity.setDurationMinutes(dto.durationMinutes());
-        if (dto.distanceKm() != null) entity.setDistanceKm(dto.distanceKm());
-        if (dto.steps() != null) entity.setSteps(dto.steps());
-        if (dto.caloriesBurned() != null) entity.setCaloriesBurned(dto.caloriesBurned());
-        if (dto.notes() != null) entity.setNotes(dto.notes());
-        if (dto.isActive() != null) entity.setIsActive(dto.isActive());
     }
 
     private void copyPhysicalActivityDtoToEntity(PhysicalActivityDTO dto, PhysicalActivityEntity entity) {

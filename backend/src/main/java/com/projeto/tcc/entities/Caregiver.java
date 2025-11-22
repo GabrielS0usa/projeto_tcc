@@ -7,24 +7,28 @@ import java.util.Objects;
 @Table(name = "tb_caregiver")
 public class Caregiver {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(nullable = false)
-	private String name;
+    @Column(nullable = false)
+    private String name;
 
-	@Column(nullable = false, unique = true)
-	private String email;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-	public Caregiver() {
-	}
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
-	public Caregiver(Long id, String name, String email) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-	}
+    public Caregiver() {}
+
+    public Caregiver(Long id, String name, String email, User user) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.user = user;
+    }
 
 	public Long getId() {
 		return id;
@@ -48,6 +52,14 @@ public class Caregiver {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	@Override

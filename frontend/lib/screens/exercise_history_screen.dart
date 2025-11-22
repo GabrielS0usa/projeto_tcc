@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../theme/app_colors.dart';
 import '../models/physical_activity.dart';
+import 'dart:convert'; 
+import '../services/api_service.dart'; 
+import 'package:http/http.dart' as http; 
 
 class ExerciseHistoryScreen extends StatefulWidget {
   const ExerciseHistoryScreen({Key? key}) : super(key: key);
@@ -19,6 +22,9 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
   List<WalkingSession> _sessions = [];
   WeeklyExerciseSummary _weeklySummary = WeeklyExerciseSummary.empty();
 
+  final ApiService _apiService = ApiService();
+
+  
   @override
   void initState() {
     super.initState();
@@ -27,52 +33,56 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
 
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
-    
-    // TODO: Replace with actual API call
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    // Mock data
-    setState(() {
-      _sessions = [
-        WalkingSession(
-          id: '1',
-          startTime: DateTime.now().subtract(const Duration(hours: 2)),
-          endTime: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
-          durationMinutes: 30,
-          distanceKm: 2.5,
-          steps: 3200,
-          caloriesBurned: 120,
-        ),
-        WalkingSession(
-          id: '2',
-          startTime: DateTime.now().subtract(const Duration(days: 1, hours: 3)),
-          endTime: DateTime.now().subtract(const Duration(days: 1, hours: 2, minutes: 15)),
-          durationMinutes: 45,
-          distanceKm: 3.8,
-          steps: 4800,
-          caloriesBurned: 180,
-        ),
-        WalkingSession(
-          id: '3',
-          startTime: DateTime.now().subtract(const Duration(days: 2, hours: 4)),
-          endTime: DateTime.now().subtract(const Duration(days: 2, hours: 3, minutes: 40)),
-          durationMinutes: 20,
-          distanceKm: 1.6,
-          steps: 2000,
-          caloriesBurned: 80,
-        ),
-      ];
 
-      _weeklySummary = WeeklyExerciseSummary(
-        totalSteps: 10000,
-        totalMinutes: 95,
-        totalCalories: 380,
-        activeDays: 3,
-        dailyGoals: [],
+    try {
+      final responses = await Future.wait([
+        _apiService.getWeeklyExerciseSummary(),
+        _apiService.getAllWalkingSessions()
+      ]);
+
+      final summaryResponse = responses[0];
+      final sessionsResponse = responses[1];
+
+      if (summaryResponse.statusCode == 200 && sessionsResponse.statusCode == 200) {
+        
+        final summaryData = jsonDecode(utf8.decode(summaryResponse.bodyBytes));
+        final newWeeklySummary = WeeklyExerciseSummary.fromJson(summaryData);
+
+        final List<dynamic> sessionsData = jsonDecode(utf8.decode(sessionsResponse.bodyBytes));
+        final newSessions = sessionsData
+            .map((json) => WalkingSession.fromJson(json))
+            .toList();
+
+        setState(() {
+          _weeklySummary = newWeeklySummary;
+          _sessions = newSessions;
+        });
+      } else {
+        if (summaryResponse.statusCode != 200) {
+          print('Erro ao carregar resumo: ${summaryResponse.body}');
+        }
+        if (sessionsResponse.statusCode != 200) {
+          print('Erro ao carregar sessões: ${sessionsResponse.body}');
+        }
+        _showErrorSnackBar('Não foi possível carregar o histórico.');
+      }
+    } catch (e) {
+      print('Exceção ao carregar histórico: $e');
+      _showErrorSnackBar('Erro de conexão. Tente novamente.');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red[700],
+        ),
       );
-
-      _isLoading = false;
-    });
+    }
   }
 
   List<WalkingSession> _getSessionsForDay(DateTime day) {

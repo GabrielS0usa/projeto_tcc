@@ -33,13 +33,10 @@ public class ConsentService {
                 .orElse(null);
 
         if (consent == null) {
-      
-            return new ConsentResponseDTO(false, null, null);
+
+            return new ConsentResponseDTO();
         } else {
-            return new ConsentResponseDTO(
-                    consent.isActive(),
-                    consent.getCaregiver().getEmail(),
-                    consent.getCaregiver().getName());
+            return new ConsentResponseDTO(consent);
         }
     }
 
@@ -66,10 +63,7 @@ public class ConsentService {
 
         consent = consentRepository.save(consent);
 
-        return new ConsentResponseDTO(
-                consent.isActive(),
-                consent.getCaregiver() != null ? consent.getCaregiver().getEmail() : null,
-                consent.getCaregiver() != null ? consent.getCaregiver().getName() : null);
+        return new ConsentResponseDTO(consent);
     }
 
     private User getCurrentUser() {

@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 
 import com.projeto.tcc.dto.ProgressDTO;
 import com.projeto.tcc.dto.UserProfileDTO;
+import com.projeto.tcc.entities.Caregiver;
 import com.projeto.tcc.entities.User;
-import com.projeto.tcc.entities.Wellness; 
+import com.projeto.tcc.entities.Wellness;
+import com.projeto.tcc.repositories.CaregiverRepository;
 import com.projeto.tcc.repositories.MedicationTaskRepository;
 import com.projeto.tcc.repositories.UserRepository;
 import com.projeto.tcc.repositories.WellnessRepository; 
@@ -26,10 +28,18 @@ public class UserService {
     private WellnessRepository wellnessRepository; 
     @Autowired
     private MedicineService medicineService; 
+    
+    @Autowired
+    private CaregiverRepository caregiverRepository;
 
     public UserProfileDTO getUserProfile() {
         User user = getCurrentUser();
-        return new UserProfileDTO(user.getName());
+        User newUser = userRepository.findByEmail(user.getEmail()).get();
+        Caregiver caregiver = caregiverRepository.findByUser(newUser).orElse(null);
+
+        String caregiverName = (caregiver != null) ? caregiver.getName() : null;
+        String caregiverEmail = (caregiver != null) ? caregiver.getEmail() : null;
+        return new UserProfileDTO(user.getName(), user.getEmail(), user.getPhone(), user.getBirthDate(), caregiverName, caregiverEmail);
     }
 
     public ProgressDTO getTodayProgress() {

@@ -39,7 +39,6 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
           _isLoading = false;
         });
       } else {
-        // If no goal exists, use default
         setState(() {
           _dailyGoal = DailyExerciseGoal.defaultGoal();
           _isLoading = false;

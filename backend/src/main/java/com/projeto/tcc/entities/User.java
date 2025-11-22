@@ -48,6 +48,9 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Consent consent;
     
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Caregiver caregiver;
+    
     @ManyToMany
     @JoinTable(name = "tb_user_role",
     		joinColumns = @JoinColumn(name = "user_id"),
@@ -142,7 +145,15 @@ public class User implements UserDetails {
         this.activities = activities;
     }
     
-    public boolean hasRole(String roleName) {
+    public Caregiver getCaregiver() {
+		return caregiver;
+	}
+
+	public void setCaregiver(Caregiver caregiver) {
+		this.caregiver = caregiver;
+	}
+
+	public boolean hasRole(String roleName) {
     	for(Role role : roles) {
     		if (role.getAuthority().equals(roleName)) {
     			return true;

@@ -11,7 +11,7 @@ class ApiService {
 
   Future<Map<String, String>> _getAuthHeaders() async {
     final token = await _storage.read(key: 'jwt_token');
-    
+
     if (token != null) {
       return {
         'Content-Type': 'application/json; charset=UTF-8',
@@ -50,14 +50,14 @@ class ApiService {
     return http.delete(url, headers: headers);
   }
 
-  // ==================== COGNITIVE ACTIVITIES ====================
+  Future<String?> _getUserId() async {
+    return await _storage.read(key: 'user_id');
+  }
 
-  // Statistics
   Future<http.Response> getCognitiveStats() async {
     return get('/cognitive-activities/stats');
   }
 
-  // Reading Activities
   Future<http.Response> getReadingActivities() async {
     return get('/cognitive-activities/reading');
   }
@@ -66,7 +66,8 @@ class ApiService {
     return post('/cognitive-activities/reading', data);
   }
 
-  Future<http.Response> updateReadingActivity(int id, Map<String, dynamic> data) async {
+  Future<http.Response> updateReadingActivity(
+      int id, Map<String, dynamic> data) async {
     return put('/cognitive-activities/reading/$id', data);
   }
 
@@ -74,16 +75,17 @@ class ApiService {
     return delete('/cognitive-activities/reading/$id');
   }
 
-  // Crossword Activities
   Future<http.Response> getCrosswordActivities() async {
     return get('/cognitive-activities/crosswords');
   }
 
-  Future<http.Response> createCrosswordActivity(Map<String, dynamic> data) async {
+  Future<http.Response> createCrosswordActivity(
+      Map<String, dynamic> data) async {
     return post('/cognitive-activities/crosswords', data);
   }
 
-  Future<http.Response> updateCrosswordActivity(int id, Map<String, dynamic> data) async {
+  Future<http.Response> updateCrosswordActivity(
+      int id, Map<String, dynamic> data) async {
     return put('/cognitive-activities/crosswords/$id', data);
   }
 
@@ -91,7 +93,6 @@ class ApiService {
     return delete('/cognitive-activities/crosswords/$id');
   }
 
-  // Movie Activities
   Future<http.Response> getMovieActivities() async {
     return get('/cognitive-activities/movies');
   }
@@ -100,7 +101,8 @@ class ApiService {
     return post('/cognitive-activities/movies', data);
   }
 
-  Future<http.Response> updateMovieActivity(int id, Map<String, dynamic> data) async {
+  Future<http.Response> updateMovieActivity(
+      int id, Map<String, dynamic> data) async {
     return put('/cognitive-activities/movies/$id', data);
   }
 
@@ -108,14 +110,12 @@ class ApiService {
     return delete('/cognitive-activities/movies/$id');
   }
 
-  // ==================== PHYSICAL EXERCISES ====================
-
-  // Walking Sessions
-  Future<http.Response> startWalkingSession(Map<String, dynamic> data) async {
-    return post('/physical-exercises/walking/start', data);
+  Future<http.Response> startWalkingSession() async {
+    return post('/physical-exercises/walking/start', {});
   }
 
-  Future<http.Response> endWalkingSession(int id, Map<String, dynamic> data) async {
+  Future<http.Response> endWalkingSession(
+      int id, Map<String, dynamic> data) async {
     return put('/physical-exercises/walking/$id/end', data);
   }
 
@@ -127,20 +127,23 @@ class ApiService {
     return get('/physical-exercises/walking');
   }
 
-  Future<http.Response> getWalkingSessionsByDateRange(String startDate, String endDate) async {
-    return get('/physical-exercises/walking/range?startDate=$startDate&endDate=$endDate');
+  Future<http.Response> getWalkingSessionsByDateRange(
+      String startDate, String endDate) async {
+    return get(
+        '/physical-exercises/walking/range?startDate=$startDate&endDate=$endDate');
   }
 
   Future<http.Response> deleteWalkingSession(int id) async {
     return delete('/physical-exercises/walking/$id');
   }
 
-  // Physical Activities
-  Future<http.Response> createPhysicalActivity(Map<String, dynamic> data) async {
+  Future<http.Response> createPhysicalActivity(
+      Map<String, dynamic> data) async {
     return post('/physical-exercises/activities', data);
   }
 
-  Future<http.Response> updatePhysicalActivity(int id, Map<String, dynamic> data) async {
+  Future<http.Response> updatePhysicalActivity(
+      int id, Map<String, dynamic> data) async {
     return put('/physical-exercises/activities/$id', data);
   }
 
@@ -148,24 +151,101 @@ class ApiService {
     return get('/physical-exercises/activities');
   }
 
-  Future<http.Response> getPhysicalActivitiesByDateRange(String startDate, String endDate) async {
-    return get('/physical-exercises/activities/range?startDate=$startDate&endDate=$endDate');
+  Future<http.Response> getPhysicalActivitiesByDateRange(
+      String startDate, String endDate) async {
+    return get(
+        '/physical-exercises/activities/range?startDate=$startDate&endDate=$endDate');
   }
 
   Future<http.Response> deletePhysicalActivity(int id) async {
     return delete('/physical-exercises/activities/$id');
   }
 
-  // Daily Exercise Goals
   Future<http.Response> getTodayExerciseGoal() async {
     return get('/physical-exercises/goals/today');
   }
 
-  Future<http.Response> updateDailyExerciseGoal(Map<String, dynamic> data) async {
+  Future<http.Response> updateDailyExerciseGoal(
+      Map<String, dynamic> data) async {
     return put('/physical-exercises/goals', data);
   }
 
   Future<http.Response> getWeeklyExerciseSummary() async {
     return get('/physical-exercises/summary/weekly');
+  }
+
+  Future<http.Response> getUserStatistics() async {
+    final userId = await _getUserId();
+    return get('/user/$userId/statistics');
+  }
+
+  Future<http.Response> logout() async {
+    return post('/logout', {});
+  }
+
+  Future<http.Response> getUserMe() async {
+    return get('/user/profile');
+  }
+
+  Future<http.Response> updateUserConsent({
+    required int userId,
+    required Map<String, dynamic> body,
+  }) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    final url = Uri.parse('$_baseUrl/api/users/$userId/consent');
+
+    return http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
+    );
+  }
+
+  Future<http.Response> updateUserProfile({
+    required int userId,
+    required Map<String, dynamic> data,
+  }) async {
+    return put('/api/users/$userId/profile', data); // ← Corrigido
+  }
+
+  Future<http.Response> getUserStats() async {
+    return get('/api/stats/user-stats');
+  }
+
+  Future<http.Response> getWeeklyProgress() async {
+    return get('/api/stats/weekly-progress');
+  }
+
+  Future<http.Response> logoutUser() async {
+    return post('/api/auth/logout', {});
+  }
+
+  Future<http.Response> updateUserProfileNew(Map<String, dynamic> data) async {
+    return put('/user/profile', data);
+  }
+
+  Future<http.Response> updateUserConsentNew(Map<String, dynamic> data) async {
+    return put('/api/user/consent', data);
+  }
+
+  Future<http.Response> getDiaryEntries(String date) async {
+    return get('/api/diary/entries?date=$date');
+  }
+
+  Future<http.Response> createDiaryEntry(Map<String, dynamic> data) async {
+    return post('/api/diary/entries', data);
+  }
+
+  Future<http.Response> updateDiaryEntry(
+      int id, Map<String, dynamic> data) async {
+    return put('/api/diary/entries/$id', data);
+  }
+
+  Future<http.Response> deleteDiaryEntry(int id) async {
+    return delete('/api/diary/entries/$id');
   }
 }

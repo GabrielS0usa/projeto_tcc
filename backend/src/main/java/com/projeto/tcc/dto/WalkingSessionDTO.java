@@ -10,7 +10,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 public record WalkingSessionDTO(
     Long id,
     
-    @NotNull(message = "Start time is required")
     LocalDateTime startTime,
     
     LocalDateTime endTime,

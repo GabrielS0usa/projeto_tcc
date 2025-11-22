@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.projeto.tcc.dto.DailyExerciseGoalDTO;
 import com.projeto.tcc.dto.PhysicalActivityDTO;
 import com.projeto.tcc.dto.WalkingSessionDTO;
+import com.projeto.tcc.dto.WalkingStartDTO;
 import com.projeto.tcc.dto.WeeklyExerciseSummaryDTO;
 import com.projeto.tcc.services.PhysicalExerciseService;
 
@@ -34,11 +35,9 @@ public class PhysicalExerciseController {
     @Autowired
     private PhysicalExerciseService service;
 
-    // ==================== Walking Session Endpoints ====================
-
     @PostMapping("/walking/start")
-    public ResponseEntity<WalkingSessionDTO> startWalkingSession(@RequestBody @Valid WalkingSessionDTO dto) {
-        WalkingSessionDTO created = service.startWalkingSession(dto);
+    public ResponseEntity<WalkingStartDTO> startWalkingSession() {
+    	WalkingStartDTO created = service.startWalkingSession();
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -79,8 +78,6 @@ public class PhysicalExerciseController {
         return ResponseEntity.noContent().build();
     }
 
-    // ==================== Physical Activity Endpoints ====================
-
     @PostMapping("/activities")
     public ResponseEntity<PhysicalActivityDTO> createPhysicalActivity(@RequestBody @Valid PhysicalActivityDTO dto) {
         PhysicalActivityDTO created = service.createPhysicalActivity(dto);
@@ -114,8 +111,6 @@ public class PhysicalExerciseController {
         service.deletePhysicalActivity(id);
         return ResponseEntity.noContent().build();
     }
-
-    // ==================== Daily Exercise Goal Endpoints ====================
 
     @GetMapping("/goals/today")
     public ResponseEntity<DailyExerciseGoalDTO> getTodayGoal() {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 enum CognitiveActivityType { reading, crosswords, movies }
 
-// Reading Activity Model
 class ReadingActivity {
   final String? id;
   final String bookTitle;
@@ -54,8 +53,8 @@ class ReadingActivity {
       currentPage: json['currentPage'] ?? 0,
       notes: json['notes'],
       startDate: DateTime.parse(json['startDate']),
-      completionDate: json['completionDate'] != null 
-          ? DateTime.parse(json['completionDate']) 
+      completionDate: json['completionDate'] != null
+          ? DateTime.parse(json['completionDate'])
           : null,
       isCompleted: json['isCompleted'] ?? false,
     );
@@ -86,11 +85,10 @@ class ReadingActivity {
   }
 }
 
-// Crossword Activity Model
 class CrosswordActivity {
   final String? id;
   final String puzzleName;
-  final String difficulty; // 'easy', 'medium', 'hard'
+  final String difficulty;
   final DateTime date;
   final int timeSpentMinutes;
   final bool isCompleted;
@@ -121,11 +119,11 @@ class CrosswordActivity {
   factory CrosswordActivity.fromJson(Map<String, dynamic> json) {
     return CrosswordActivity(
       id: json['id']?.toString(),
-      puzzleName: json['puzzleName'] ?? '',
-      difficulty: json['difficulty'] ?? 'medium',
+      puzzleName: json['puzzleName'],
+      difficulty: json['difficulty'],
       date: DateTime.parse(json['date']),
-      timeSpentMinutes: json['timeSpentMinutes'] ?? 0,
-      isCompleted: json['isCompleted'] ?? false,
+      timeSpentMinutes: json['timeSpentMinutes'],
+      isCompleted: json['isCompleted'],
       notes: json['notes'],
     );
   }
@@ -133,23 +131,22 @@ class CrosswordActivity {
   Color getDifficultyColor() {
     switch (difficulty.toLowerCase()) {
       case 'easy':
-        return const Color(0xFF4CAF50); // Green
+        return const Color(0xFF4CAF50);
       case 'medium':
-        return const Color(0xFFF7B300); // Yellow
+        return const Color(0xFFF7B300);
       case 'hard':
-        return const Color(0xFFDC411E); // Orange/Red
+        return const Color(0xFFDC411E);
       default:
-        return const Color(0xFF9E9E9E); // Gray
+        return const Color(0xFF9E9E9E);
     }
   }
 }
 
-// Movie Activity Model
 class MovieActivity {
   final String? id;
   final String movieTitle;
   final String? genre;
-  final int rating; // 1-5 stars
+  final int rating;
   final DateTime watchDate;
   final String? review;
   final bool isWatched;
@@ -189,7 +186,6 @@ class MovieActivity {
   }
 }
 
-// Summary statistics for Active Mind dashboard
 class CognitiveActivityStats {
   final int booksRead;
   final int crosswordsCompleted;

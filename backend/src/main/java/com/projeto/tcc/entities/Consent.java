@@ -1,6 +1,7 @@
 package com.projeto.tcc.entities;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -11,26 +12,39 @@ public class Consent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY) 
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false, unique = true)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY) 
-    @JoinColumn(name = "caregiver_id", referencedColumnName = "id", nullable = false)
-    private Caregiver caregiver; 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "caregiver_id", referencedColumnName = "id", nullable = true)
+    private Caregiver caregiver;
 
     @Column(nullable = false)
     private boolean active;
 
+    // Enhanced consent fields
+    private boolean dataSharing;
+    private boolean analytics;
+    private boolean notifications;
+    private LocalDateTime lastUpdated;
+
     public Consent() {
         this.active = false;
+        this.dataSharing = false;
+        this.analytics = false;
+        this.notifications = false;
     }
 
-    public Consent(Long id, User user, Caregiver caregiver, boolean active) {
+    public Consent(Long id, User user, Caregiver caregiver, boolean active, boolean dataSharing, boolean analytics, boolean notifications, LocalDateTime lastUpdated) {
         this.id = id;
         this.user = user;
         this.caregiver = caregiver;
         this.active = active;
+        this.dataSharing = dataSharing;
+        this.analytics = analytics;
+        this.notifications = notifications;
+        this.lastUpdated = lastUpdated;
     }
 
     // Getters e Setters
@@ -64,6 +78,46 @@ public class Consent {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isDataSharing() {
+        return dataSharing;
+    }
+
+    public void setDataSharing(boolean dataSharing) {
+        this.dataSharing = dataSharing;
+    }
+
+    public boolean isAnalytics() {
+        return analytics;
+    }
+
+    public void setAnalytics(boolean analytics) {
+        this.analytics = analytics;
+    }
+
+    public boolean isNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(boolean notifications) {
+        this.notifications = notifications;
+    }
+
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public String getCaregiverEmail() {
+        return caregiver != null ? caregiver.getEmail() : null;
+    }
+
+    public String getCaregiverName() {
+        return caregiver != null ? caregiver.getName() : null;
     }
 
     // equals e hashCode baseados no ID

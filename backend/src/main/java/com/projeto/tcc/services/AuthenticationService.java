@@ -25,6 +25,8 @@ import com.projeto.tcc.repositories.UserRepository;
 import com.projeto.tcc.services.exceptions.DatabaseException;
 import com.projeto.tcc.services.exceptions.ResourceNotFoundException;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class AuthenticationService {
 
@@ -51,43 +53,54 @@ public class AuthenticationService {
 	public LoginResponseDTO login(AuthenticationDTO data) {
 		var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
 		var auth = this.authenticationManager.authenticate(usernamePassword);
-
+		
+		var user = (User) auth.getPrincipal();
 		var token = tokenService.generateToken((User) auth.getPrincipal());
-
-		return new LoginResponseDTO(token);
+		User userNew = repository.findByEmail(data.email()).get();
+		Long userId = userNew.getId();
+		
+		return new LoginResponseDTO(token, userId);
 	}
 
+	@Transactional
 	public UserMinDTO register(RegisterDTO data) {
-		if (repository.findByEmail(data.email()).isPresent()) {
-			throw new DatabaseException("E-mail já cadastrado!");
-		}
 
-		String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-		User newUser = new User();
+	    if (repository.findByEmail(data.email()).isPresent()) {
+	        throw new DatabaseException("E-mail já cadastrado!");
+	    }
 
-		copyDtoToEntity(data, newUser, encryptedPassword);
+	    String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
 
-		repository.save(newUser);
+	    User newUser = new User();
+	    copyDtoToEntity(data, newUser, encryptedPassword);
 
-		if (data.caregiverEmail() != null && !data.caregiverEmail().isBlank()) {
+	    newUser = repository.save(newUser);
 
-			Caregiver caregiver = caregiverRepository.findByEmail(data.caregiverEmail()).orElseGet(() -> {
-				Caregiver newCaregiver = new Caregiver();
-				newCaregiver.setEmail(data.caregiverEmail());
-				newCaregiver.setName(data.caregiverName()); 
-				return caregiverRepository.save(newCaregiver);
-			});
+	    Caregiver caregiver = null;
 
-			
-			Consent newConsent = new Consent();
-			newConsent.setUser(newUser);
-			newConsent.setCaregiver(caregiver); 
-			newConsent.setActive(false); 
+	    if (data.caregiverEmail() != null && !data.caregiverEmail().isBlank()) {
 
-			consentRepository.save(newConsent);
-		}
+	        caregiver = caregiverRepository.findByEmail(data.caregiverEmail())
+	                .orElseGet(() -> new Caregiver());
 
-		return new UserMinDTO(newUser);
+	        caregiver.setEmail(data.caregiverEmail());
+	        caregiver.setName(data.caregiverName());
+	        caregiver.setUser(newUser);
+
+	        caregiver = caregiverRepository.save(caregiver);
+
+	        newUser.setCaregiver(caregiver);
+	        newUser = repository.save(newUser);
+
+	        Consent newConsent = new Consent();
+	        newConsent.setUser(newUser);
+	        newConsent.setCaregiver(caregiver);
+	        newConsent.setActive(false);
+
+	        consentRepository.save(newConsent);
+	    }
+
+	    return new UserMinDTO(newUser);
 	}
 
 	private void copyDtoToEntity(RegisterDTO dto, User entity, String password) {
