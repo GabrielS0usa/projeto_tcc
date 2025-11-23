@@ -7,7 +7,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.2.5</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath /> 
 	</parent>
 	<groupId>com.projeto</groupId>
 	<artifactId>tcc</artifactId>
@@ -87,15 +87,14 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.30</version> <!-- use a versão mais recente -->
+			<version>1.18.30</version> 
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
-			<version>6.2.2</version> <!-- use a versão correspondente do seu
-			Spring Security -->
+			<version>6.2.2</version> 
 			<scope>test</scope>
 		</dependency>
 
@@ -104,6 +103,11 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.2</version>
+		</dependency>
 
 	</dependencies>
 
@@ -112,7 +116,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version> <!--$NO-MVN-MAN-VER$ -->
+				<version>3.1.0</version> 
 			</plugin>
 
 			<plugin>
