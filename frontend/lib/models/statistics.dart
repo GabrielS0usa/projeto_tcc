@@ -1,5 +1,3 @@
-// lib/models/statistics.dart
-
 class UserStatistics {
   final StatisticsSummary summary;
   final ActivityCharts charts;
@@ -15,7 +13,8 @@ class UserStatistics {
 
   factory UserStatistics.fromJson(Map<String, dynamic> json) {
     return UserStatistics(
-      summary: StatisticsSummary.fromJson(json['summary'] as Map<String, dynamic>),
+      summary:
+          StatisticsSummary.fromJson(json['summary'] as Map<String, dynamic>),
       charts: ActivityCharts.fromJson(json['charts'] as Map<String, dynamic>),
       trends: TrendAnalysis.fromJson(json['trends'] as Map<String, dynamic>),
       generatedAt: DateTime.parse(json['generatedAt'] as String),
@@ -158,7 +157,6 @@ class ActivityTrend {
   }
 }
 
-// Legacy Statistics class for backward compatibility
 class Statistics {
   final int totalActivities;
   final double averageActivitiesPerDay;
@@ -177,8 +175,10 @@ class Statistics {
   factory Statistics.fromJson(Map<String, dynamic> json) {
     return Statistics(
       totalActivities: json['totalActivities'] as int,
-      averageActivitiesPerDay: (json['averageActivitiesPerDay'] as num).toDouble(),
-      activitiesByCategory: Map<String, int>.from(json['activitiesByCategory'] as Map),
+      averageActivitiesPerDay:
+          (json['averageActivitiesPerDay'] as num).toDouble(),
+      activitiesByCategory:
+          Map<String, int>.from(json['activitiesByCategory'] as Map),
       weeklyTrends: (json['weeklyTrends'] as List)
           .map((item) => TrendData.fromJson(item as Map<String, dynamic>))
           .toList(),

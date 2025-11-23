@@ -34,8 +34,6 @@ public class ConfigurationController {
 
     @PostMapping("/auth/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
-        // Invalidate token - in production, add token to blacklist
-        // For now, just return success
         return ResponseEntity.ok().build();
     }
 
@@ -47,13 +45,12 @@ public class ConfigurationController {
 
     @PutMapping("/user/consent")
     public ResponseEntity<ConsentResponseDTO> updateConsent(@RequestBody ConsentUpdateRequest request) {
-        // For now, using userId 1 as default. In production, get from JWT token
         ConsentResponseDTO updatedConsent = userConsentService.updateUserConsent(1L, new ConsentRequestDTO(
             request.isMarketingConsent(),
             request.isDataProcessingConsent(),
             request.isTermsAccepted(),
-            true, // active
-            null  // caregiverEmail
+            true, 
+            null  
         ));
         return ResponseEntity.ok(updatedConsent);
     }

@@ -12,7 +12,6 @@ public class DailyReportRequestDTO {
     @NotNull
     private LocalDate date;
 
-    // Getters e Setters
     public String getUserId() {
         return userId;
     }

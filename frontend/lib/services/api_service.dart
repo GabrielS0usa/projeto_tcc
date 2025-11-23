@@ -1,6 +1,5 @@
-// lib/services/api_service.dart
-
 import 'dart:convert';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -209,7 +208,7 @@ class ApiService {
     required int userId,
     required Map<String, dynamic> data,
   }) async {
-    return put('/api/users/$userId/profile', data); // ← Corrigido
+    return put('/api/users/$userId/profile', data);
   }
 
   Future<http.Response> getUserStats() async {
@@ -247,5 +246,36 @@ class ApiService {
 
   Future<http.Response> deleteDiaryEntry(int id) async {
     return delete('/api/diary/entries/$id');
+  }
+
+  Future<http.Response> sendDailyReport({required int userId}) async {
+    final token = await _storage.read(key: 'jwt_token');
+    final url = Uri.parse('$_baseUrl/wellness-diary/daily-report');
+
+    return http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'userId': userId,
+        'date': DateTime.now().toIso8601String().split('T')[0],
+      }),
+    );
+  }
+
+  Future<http.Response> previewDailyReport({required int userId}) async {
+    final token = await _storage.read(key: 'jwt_token');
+
+    final url = Uri.parse('$_baseUrl/wellness-diary/daily-report');
+
+    return http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
   }
 }

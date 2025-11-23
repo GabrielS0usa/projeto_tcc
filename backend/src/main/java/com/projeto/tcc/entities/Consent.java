@@ -23,7 +23,6 @@ public class Consent {
     @Column(nullable = false)
     private boolean active;
 
-    // Enhanced consent fields
     private boolean dataSharing;
     private boolean analytics;
     private boolean notifications;
@@ -47,7 +46,6 @@ public class Consent {
         this.lastUpdated = lastUpdated;
     }
 
-    // Getters e Setters
     public Long getId() {
         return id;
     }
@@ -120,7 +118,6 @@ public class Consent {
         return caregiver != null ? caregiver.getName() : null;
     }
 
-    // equals e hashCode baseados no ID
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

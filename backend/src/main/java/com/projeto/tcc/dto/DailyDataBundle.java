@@ -29,11 +29,9 @@ public class DailyDataBundle {
     private List<CrosswordActivity> crosswordActivities;
     private List<MovieActivity> movieActivities;
 
-    // Construtor privado para forçar o uso do Builder
     private DailyDataBundle() {
     }
 
-    // Getters
     public User getUser() { return user; }
     public Wellness getWellness() { return wellness; }
     public List<NutritionalEntry> getNutritionalEntries() { return nutritionalEntries; }
@@ -47,7 +45,6 @@ public class DailyDataBundle {
     public List<CrosswordActivity> getCrosswordActivities() { return crosswordActivities; }
     public List<MovieActivity> getMovieActivities() { return movieActivities; }
 
-    // Builder manual
     public static class Builder {
         private final DailyDataBundle instance = new DailyDataBundle();
 

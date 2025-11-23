@@ -1,12 +1,13 @@
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:intl/intl.dart';
+
 import '../models/medication_task.dart';
-import '../services/api_service.dart';
-import 'add_medicine_screen.dart';
 import '../models/medicine_model.dart';
-import '../theme/app_colors.dart'; 
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
+import 'add_medicine_screen.dart';
 
 class MedicinesScreen extends StatefulWidget {
   const MedicinesScreen({Key? key}) : super(key: key);
@@ -52,7 +53,7 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
 
   Future<void> _markAsTaken(int index, bool newState) async {
     final task = _tasks[index];
-    
+
     setState(() {
       task.taken = newState;
     });
@@ -96,14 +97,17 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: VivaBemColors.vermelhoErro),
+      SnackBar(
+          content: Text(message), backgroundColor: VivaBemColors.vermelhoErro),
     );
   }
 
   void _showSuccess(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: VivaBemColors.verdeConfirmacao),
+      SnackBar(
+          content: Text(message),
+          backgroundColor: VivaBemColors.verdeConfirmacao),
     );
   }
 
@@ -117,12 +121,13 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
           onPressed: () => Navigator.pop(context),
           color: VivaBemColors.branco,
         ),
-        title: const Text('Remédios de Hoje', style: TextStyle(color: VivaBemColors.branco)),
+        title: const Text('Remédios de Hoje',
+            style: TextStyle(color: VivaBemColors.branco)),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                HealthPalete.azulSereno, 
+                HealthPalete.azulSereno,
                 HealthPalete.azulSereno.withOpacity(0.7),
               ],
               begin: Alignment.topLeft,
@@ -132,17 +137,20 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: HealthPalete.azulSereno))
+          ? const Center(
+              child: CircularProgressIndicator(color: HealthPalete.azulSereno))
           : _tasks.isEmpty
-            ? const Center(child: Text(
-                "Nenhum remédio agendado para hoje.",
-                style: TextStyle(color: VivaBemColors.cinzaEscuro),
-              ))
-            : ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: _tasks.length,
-                itemBuilder: (context, index) => _buildMedicineItem(_tasks[index], index),
-              ),
+              ? const Center(
+                  child: Text(
+                  "Nenhum remédio agendado para hoje.",
+                  style: TextStyle(color: VivaBemColors.cinzaEscuro),
+                ))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: _tasks.length,
+                  itemBuilder: (context, index) =>
+                      _buildMedicineItem(_tasks[index], index),
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final newMedicineSchedule = await Navigator.push(
@@ -159,7 +167,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 "durationDays": newMedicineSchedule.durationDays,
                 "startDate": newMedicineSchedule.startDate
               };
-              final response = await _apiService.post('/medicines/save', scheduleData);
+              final response =
+                  await _apiService.post('/medicines/save', scheduleData);
 
               if (response.statusCode == 201) {
                 _showSuccess('Remédio salvo com sucesso!');
@@ -167,7 +176,8 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 _fetchTodayTasks();
               } else {
                 final errorData = jsonDecode(response.body);
-                _showError(errorData['message'] ?? 'Falha ao salvar o novo remédio.');
+                _showError(
+                    errorData['message'] ?? 'Falha ao salvar o novo remédio.');
               }
             } catch (e) {
               _showError('Erro de conexão ao salvar.');
@@ -213,8 +223,11 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
                 },
                 activeColor: VivaBemColors.cinzaEscuro,
                 checkColor: VivaBemColors.branco,
-                side: BorderSide(color: VivaBemColors.cinzaEscuro.withOpacity(0.5), width: 2),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                side: BorderSide(
+                    color: VivaBemColors.cinzaEscuro.withOpacity(0.5),
+                    width: 2),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)),
               ),
             ),
             const SizedBox(width: 8),
@@ -222,7 +235,9 @@ class _MedicinesScreenState extends State<MedicinesScreen> {
               child: Text(
                 '${task.name} ${task.dose}',
                 style: TextStyle(
-                  color: task.taken ? VivaBemColors.cinzaEscuro.withOpacity(0.5) : VivaBemColors.cinzaEscuro,
+                  color: task.taken
+                      ? VivaBemColors.cinzaEscuro.withOpacity(0.5)
+                      : VivaBemColors.cinzaEscuro,
                   decoration: task.taken ? TextDecoration.lineThrough : null,
                   fontSize: 16,
                 ),

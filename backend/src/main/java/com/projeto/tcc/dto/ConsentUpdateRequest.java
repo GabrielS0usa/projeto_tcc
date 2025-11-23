@@ -1,7 +1,5 @@
 package com.projeto.tcc.dto;
 
-import jakarta.validation.constraints.NotNull;
-
 public class ConsentUpdateRequest {
  
     private boolean marketingConsent;
@@ -18,7 +16,6 @@ public class ConsentUpdateRequest {
         this.termsAccepted = termsAccepted;
     }
 
-    // Getters and Setters
     public boolean isMarketingConsent() { return marketingConsent; }
     public void setMarketingConsent(boolean marketingConsent) { this.marketingConsent = marketingConsent; }
 

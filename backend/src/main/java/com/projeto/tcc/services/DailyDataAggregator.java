@@ -95,8 +95,8 @@ public class DailyDataAggregator {
 	}
 
 	private List<PhysicalActivityEntity> findPhysicalActivitiesByUserAndDate(User user, LocalDate date) {
-		LocalDateTime startOfDay = date.atStartOfDay(); 
-		LocalDateTime endOfDay = date.atTime(23, 59, 59, 999999999); 
+		LocalDateTime startOfDay = date.atStartOfDay();
+		LocalDateTime endOfDay = date.atTime(23, 59, 59, 999999999);
 
 		return physicalActivityRepository.findByUserAndDateBetweenOrderByDateDesc(user, startOfDay, endOfDay);
 	}
@@ -111,9 +111,6 @@ public class DailyDataAggregator {
 	}
 
 	private List<MedicationTask> findMedicationTasksByUserAndDate(User user, LocalDate date) {
-		// This is a simplified implementation - in practice, you'd need to filter by
-		// date
-		// For now, returning all medication tasks for the user's medicines
 		return medicationTaskRepository.findAll().stream()
 				.filter(task -> task.getMedicine().getUser().getId().equals(user.getId())).toList();
 	}

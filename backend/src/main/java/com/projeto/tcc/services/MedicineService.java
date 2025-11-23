@@ -64,7 +64,7 @@ public class MedicineService {
 	public List<MedicationTaskDTO> findTodayTasks() {
 		User user = getCurrentUser();
 		List<Medicine> schedules = repository.findByUserOrderByStartDateAscStartTimeAsc(user);
-		
+
 		LocalDate today = LocalDate.now();
 		List<MedicationTaskDTO> todayTasks = new ArrayList<>();
 
@@ -79,8 +79,8 @@ public class MedicineService {
 				while (taskTime.toLocalDate().isEqual(today)) {
 					MedicationTask task = findOrCreateTask(schedule, taskTime);
 
-					todayTasks.add(new MedicationTaskDTO(task.getId(), schedule.getId(), schedule.getName(), schedule.getDose(),
-							task.getScheduledTime(), task.isTaken()));
+					todayTasks.add(new MedicationTaskDTO(task.getId(), schedule.getId(), schedule.getName(),
+							schedule.getDose(), task.getScheduledTime(), task.isTaken()));
 
 					taskTime = taskTime.plusHours(schedule.getIntervalHours());
 				}

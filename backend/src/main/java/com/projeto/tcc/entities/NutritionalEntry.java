@@ -16,83 +16,138 @@ import jakarta.persistence.Table;
 @Table(name = "nutritional_entries")
 public class NutritionalEntry {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-    @Column(nullable = false)
-    private LocalDate date;
+	@Column(nullable = false)
+	private LocalDate date;
 
-    @Column(name = "food_name", nullable = false)
-    private String foodName;
-    
-    @Column(name = "meal_type", nullable = true) 
-    private String mealType;
+	@Column(name = "food_name", nullable = false)
+	private String foodName;
 
-    @Column(nullable = false)
-    private double calories;
+	@Column(name = "meal_type", nullable = true)
+	private String mealType;
 
-    private double protein;
-    private double carbs;
-    private double fat;
+	@Column(nullable = false)
+	private double calories;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+	private double protein;
+	private double carbs;
+	private double fat;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+	@Column(name = "created_at")
+	private LocalDateTime createdAt;
 
-    public NutritionalEntry() {}
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
-    public NutritionalEntry(User user, LocalDate date, String foodName, String mealType, double calories,
-                          double protein, double carbs, double fat) {
-        this.user = user;
-        this.date = date;
-        this.foodName = foodName;
-        this.mealType = mealType;
-        this.calories = calories;
-        this.protein = protein;
-        this.carbs = carbs;
-        this.fat = fat;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+	public NutritionalEntry() {
+	}
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+	public NutritionalEntry(User user, LocalDate date, String foodName, String mealType, double calories,
+			double protein, double carbs, double fat) {
+		this.user = user;
+		this.date = date;
+		this.foodName = foodName;
+		this.mealType = mealType;
+		this.calories = calories;
+		this.protein = protein;
+		this.carbs = carbs;
+		this.fat = fat;
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+	public Long getId() {
+		return id;
+	}
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getFoodName() { return foodName; }
-    public void setFoodName(String foodName) { this.foodName = foodName; }
-    
-    public String getMealType() { return mealType; } 
-    public void setMealType(String mealType) { this.mealType = mealType; }
+	public User getUser() {
+		return user;
+	}
 
-    public double getCalories() { return calories; }
-    public void setCalories(double calories) { this.calories = calories; }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public double getProtein() { return protein; }
-    public void setProtein(double protein) { this.protein = protein; }
+	public LocalDate getDate() {
+		return date;
+	}
 
-    public double getCarbs() { return carbs; }
-    public void setCarbs(double carbs) { this.carbs = carbs; }
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
 
-    public double getFat() { return fat; }
-    public void setFat(double fat) { this.fat = fat; }
+	public String getFoodName() {
+		return foodName;
+	}
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+	public void setFoodName(String foodName) {
+		this.foodName = foodName;
+	}
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+	public String getMealType() {
+		return mealType;
+	}
+
+	public void setMealType(String mealType) {
+		this.mealType = mealType;
+	}
+
+	public double getCalories() {
+		return calories;
+	}
+
+	public void setCalories(double calories) {
+		this.calories = calories;
+	}
+
+	public double getProtein() {
+		return protein;
+	}
+
+	public void setProtein(double protein) {
+		this.protein = protein;
+	}
+
+	public double getCarbs() {
+		return carbs;
+	}
+
+	public void setCarbs(double carbs) {
+		this.carbs = carbs;
+	}
+
+	public double getFat() {
+		return fat;
+	}
+
+	public void setFat(double fat) {
+		this.fat = fat;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 }

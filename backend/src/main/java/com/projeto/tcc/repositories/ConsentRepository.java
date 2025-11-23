@@ -11,10 +11,10 @@ import com.projeto.tcc.entities.User;
 
 public interface ConsentRepository extends JpaRepository<Consent, Long> {
 
-    Optional<Consent> findByUser(User user);
-    
-    Optional<Consent> findByUserId(Long userId);
-    
-    @Query("SELECT c FROM Consent c LEFT JOIN FETCH c.caregiver WHERE c.user.id = :userId")
-    Optional<Consent> findByUserIdWithCaregiver(@Param("userId") Long userId);
+	Optional<Consent> findByUser(User user);
+
+	Optional<Consent> findByUserId(Long userId);
+
+	@Query("SELECT c FROM Consent c LEFT JOIN FETCH c.caregiver WHERE c.user.id = :userId")
+	Optional<Consent> findByUserIdWithCaregiver(@Param("userId") Long userId);
 }

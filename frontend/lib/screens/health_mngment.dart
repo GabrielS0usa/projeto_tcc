@@ -1,12 +1,15 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:projeto/screens/appointment_form_screen.dart' hide Appointment, AppointmentType;
+import 'package:projeto/screens/appointment_form_screen.dart'
+    hide Appointment, AppointmentType;
 import 'package:table_calendar/table_calendar.dart';
-import '../theme/app_colors.dart';
-import '../services/api_service.dart';
+
 import '../models/appointment_model.dart';
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class SaudeGestaoScreen extends StatefulWidget {
   const SaudeGestaoScreen({Key? key}) : super(key: key);
@@ -77,10 +80,10 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
     return upcoming.first;
   }
 
-
   @override
   Widget build(BuildContext context) {
-    List<Appointment> selectedDayAppointments = _getAppointmentsForDay(_selectedDay);
+    List<Appointment> selectedDayAppointments =
+        _getAppointmentsForDay(_selectedDay);
 
     return Scaffold(
       backgroundColor: VivaBemColors.cinzaEscuro,
@@ -90,7 +93,8 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
         foregroundColor: VivaBemColors.branco,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: VivaBemColors.branco))
+          ? const Center(
+              child: CircularProgressIndicator(color: VivaBemColors.branco))
           : RefreshIndicator(
               onRefresh: _fetchAppointments,
               color: HealthPalete.vermelhoPrincipal,
@@ -100,7 +104,8 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (_nextAppointment != null) _buildUpcomingAppointmentCard(_nextAppointment!),
+                    if (_nextAppointment != null)
+                      _buildUpcomingAppointmentCard(_nextAppointment!),
                     const SizedBox(height: 24),
                     _buildCalendarCard(),
                     const SizedBox(height: 24),
@@ -116,7 +121,8 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
                         itemBuilder: (context, index) {
                           final appointment = selectedDayAppointments[index];
                           return GestureDetector(
-                            onTap: () => _addOrEditAppointment(existing: appointment),
+                            onTap: () =>
+                                _addOrEditAppointment(existing: appointment),
                             child: _buildAppointmentListItem(appointment),
                           );
                         },
@@ -129,14 +135,15 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
         onPressed: () => _addOrEditAppointment(),
         label: const Text('Adicionar'),
         icon: const Icon(Icons.add),
-        backgroundColor: HealthPalete.azulSereno, 
+        backgroundColor: HealthPalete.azulSereno,
       ),
     );
   }
 
   Widget _buildUpcomingAppointmentCard(Appointment appointment) {
     final daysUntil = appointment.date.difference(DateTime.now()).inDays;
-    final countdownText = daysUntil == 0 ? 'É hoje!' : 'Consulta em $daysUntil dias';
+    final countdownText =
+        daysUntil == 0 ? 'É hoje!' : 'Consulta em $daysUntil dias';
 
     return Card(
       color: HealthPalete.azulSereno.withOpacity(0.15),
@@ -150,16 +157,27 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('PRÓXIMO COMPROMISSO',
-                style: TextStyle(color: HealthPalete.azulSereno, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                style: TextStyle(
+                    color: HealthPalete.azulSereno,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2)),
             const SizedBox(height: 12),
             Text(appointment.title,
-                style: const TextStyle(color: VivaBemColors.branco, fontSize: 22, fontWeight: FontWeight.bold)),
+                style: const TextStyle(
+                    color: VivaBemColors.branco,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(countdownText,
-                style: const TextStyle(color: VivaBemColors.branco, fontSize: 18, fontStyle: FontStyle.italic)),
+                style: const TextStyle(
+                    color: VivaBemColors.branco,
+                    fontSize: 18,
+                    fontStyle: FontStyle.italic)),
             const SizedBox(height: 8),
             Text('${appointment.doctor} • ${appointment.location}',
-                style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7), fontSize: 16)),
+                style: TextStyle(
+                    color: VivaBemColors.branco.withOpacity(0.7),
+                    fontSize: 16)),
           ],
         ),
       ),
@@ -178,12 +196,13 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
           lastDay: DateTime.utc(2030, 12, 31),
           focusedDay: _focusedDay,
           selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-          onDaySelected: (selectedDay, focusedDay) =>
-              setState(() => {_selectedDay = selectedDay, _focusedDay = focusedDay}),
+          onDaySelected: (selectedDay, focusedDay) => setState(
+              () => {_selectedDay = selectedDay, _focusedDay = focusedDay}),
           eventLoader: _getAppointmentsForDay,
           calendarStyle: CalendarStyle(
             defaultTextStyle: const TextStyle(color: VivaBemColors.branco),
-            weekendTextStyle: TextStyle(color: VivaBemColors.branco.withOpacity(0.7)),
+            weekendTextStyle:
+                TextStyle(color: VivaBemColors.branco.withOpacity(0.7)),
             todayDecoration: BoxDecoration(
               color: HealthPalete.amareloAgendado.withOpacity(0.3),
               shape: BoxShape.circle,
@@ -200,9 +219,12 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
           headerStyle: HeaderStyle(
             formatButtonVisible: false,
             titleCentered: true,
-            titleTextStyle: const TextStyle(color: VivaBemColors.branco, fontSize: 18),
-            leftChevronIcon: const Icon(Icons.chevron_left, color: VivaBemColors.branco),
-            rightChevronIcon: const Icon(Icons.chevron_right, color: VivaBemColors.branco),
+            titleTextStyle:
+                const TextStyle(color: VivaBemColors.branco, fontSize: 18),
+            leftChevronIcon:
+                const Icon(Icons.chevron_left, color: VivaBemColors.branco),
+            rightChevronIcon:
+                const Icon(Icons.chevron_right, color: VivaBemColors.branco),
           ),
         ),
       ),
@@ -212,15 +234,20 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
   Widget _buildAppointmentListHeader() {
     return Text(
       'Compromissos para ${DateFormat('d \'de\' MMMM', 'pt_BR').format(_selectedDay)}',
-      style: const TextStyle(color: VivaBemColors.branco, fontSize: 20, fontWeight: FontWeight.bold),
+      style: const TextStyle(
+          color: VivaBemColors.branco,
+          fontSize: 20,
+          fontWeight: FontWeight.bold),
     );
   }
 
   Widget _buildAppointmentListItem(Appointment appointment) {
-    final typeIcon =
-        appointment.type == AppointmentType.consulta ? FontAwesomeIcons.stethoscope : FontAwesomeIcons.vial;
-    final statusColor =
-        appointment.isCompleted ? VivaBemColors.verdeConfirmacao : HealthPalete.amareloAgendado;
+    final typeIcon = appointment.type == AppointmentType.consulta
+        ? FontAwesomeIcons.stethoscope
+        : FontAwesomeIcons.vial;
+    final statusColor = appointment.isCompleted
+        ? VivaBemColors.verdeConfirmacao
+        : HealthPalete.amareloAgendado;
     final statusText = appointment.isCompleted ? "Realizado" : "Agendado";
 
     return Card(
@@ -230,13 +257,16 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
       child: ListTile(
         leading: Icon(typeIcon, color: statusColor, size: 28),
         title: Text(appointment.title,
-            style:
-                const TextStyle(color: VivaBemColors.branco, fontWeight: FontWeight.bold, fontSize: 18)),
+            style: const TextStyle(
+                color: VivaBemColors.branco,
+                fontWeight: FontWeight.bold,
+                fontSize: 18)),
         subtitle: Text(
             '${appointment.doctor}\n${DateFormat('HH:mm').format(appointment.date)} • ${appointment.location}',
             style: TextStyle(color: VivaBemColors.branco.withOpacity(0.7))),
         trailing: Chip(
-          label: Text(statusText, style: const TextStyle(fontWeight: FontWeight.bold)),
+          label: Text(statusText,
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: statusColor.withOpacity(0.2),
           side: BorderSide(color: statusColor),
         ),
@@ -251,10 +281,10 @@ class _SaudeGestaoScreenState extends State<SaudeGestaoScreen> {
         child: Text(
           'Nenhum compromisso para este dia.\nDia livre para relaxar!',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.white70, fontSize: 16, fontStyle: FontStyle.italic),
+          style: TextStyle(
+              color: Colors.white70, fontSize: 16, fontStyle: FontStyle.italic),
         ),
       ),
     );
   }
 }
-

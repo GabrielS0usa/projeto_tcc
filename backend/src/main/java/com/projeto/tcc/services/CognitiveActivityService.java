@@ -44,8 +44,6 @@ public class CognitiveActivityService {
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
-    // ==================== READING ACTIVITIES ====================
-
     @Transactional(readOnly = true)
     public List<ReadingActivityDTO> findAllReadingActivities() {
         User user = getCurrentUser();
@@ -59,15 +57,14 @@ public class CognitiveActivityService {
         ReadingActivity entity = new ReadingActivity();
         copyReadingDtoToEntity(dto, entity);
         entity.setUser(user);
-        
-        // Auto-complete if current page equals total pages
+
         if (entity.getCurrentPage() >= entity.getTotalPages()) {
             entity.setIsCompleted(true);
             if (entity.getCompletionDate() == null) {
                 entity.setCompletionDate(LocalDate.now());
             }
         }
-        
+
         entity = readingRepository.save(entity);
         return new ReadingActivityDTO(entity);
     }
@@ -84,7 +81,6 @@ public class CognitiveActivityService {
 
         copyReadingDtoToEntity(dto, entity);
         
-        // Auto-complete if current page equals total pages
         if (entity.getCurrentPage() >= entity.getTotalPages()) {
             entity.setIsCompleted(true);
             if (entity.getCompletionDate() == null) {
@@ -119,8 +115,6 @@ public class CognitiveActivityService {
         entity.setCompletionDate(dto.completionDate());
         entity.setIsCompleted(dto.isCompleted() != null ? dto.isCompleted() : false);
     }
-
-    // ==================== CROSSWORD ACTIVITIES ====================
 
     @Transactional(readOnly = true)
     public List<CrosswordActivityDTO> findAllCrosswordActivities() {
@@ -176,8 +170,6 @@ public class CognitiveActivityService {
         entity.setNotes(dto.notes());
     }
 
-    // ==================== MOVIE ACTIVITIES ====================
-
     @Transactional(readOnly = true)
     public List<MovieActivityDTO> findAllMovieActivities() {
         User user = getCurrentUser();
@@ -232,8 +224,6 @@ public class CognitiveActivityService {
         entity.setIsWatched(dto.isWatched() != null ? dto.isWatched() : true);
     }
 
-    // ==================== STATISTICS ====================
-
     @Transactional(readOnly = true)
     public CognitiveActivityStatsDTO getStatistics() {
         User user = getCurrentUser();
@@ -241,10 +231,9 @@ public class CognitiveActivityService {
         Long booksRead = readingRepository.countCompletedByUser(user);
         Long crosswordsCompleted = crosswordRepository.countCompletedByUser(user);
         Long moviesWatched = movieRepository.countWatchedByUser(user);
-        
-        // Calculate weekly streak (simplified version - counts activities in last 7 days)
+
         Integer weeklyStreak = calculateWeeklyStreak(user);
-        
+
         return new CognitiveActivityStatsDTO(booksRead, crosswordsCompleted, moviesWatched, weeklyStreak);
     }
 
@@ -252,7 +241,6 @@ public class CognitiveActivityService {
         LocalDate today = LocalDate.now();
         LocalDate weekAgo = today.minusDays(7);
         
-        // Count activities in the last 7 days
         List<ReadingActivity> recentReading = readingRepository.findByUserOrderByStartDateDesc(user)
                 .stream()
                 .filter(r -> !r.getStartDate().isBefore(weekAgo))
@@ -268,7 +256,6 @@ public class CognitiveActivityService {
                 .filter(m -> !m.getWatchDate().isBefore(weekAgo))
                 .collect(Collectors.toList());
         
-        // Calculate consecutive days with at least one activity
         int streak = 0;
         for (int i = 0; i < 7; i++) {
             LocalDate checkDate = today.minusDays(i);
@@ -281,7 +268,6 @@ public class CognitiveActivityService {
             if (hasActivity) {
                 streak++;
             } else if (i > 0) {
-                // Break streak if no activity found (but allow today to be empty)
                 break;
             }
         }

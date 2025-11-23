@@ -27,7 +27,6 @@ public class Wellness {
     @Column(columnDefinition = "TEXT")
     private String note;
 
-    @Column(nullable = false)
     private LocalDate entryDate;
 
 	public Wellness(Long id, User user, Mood mood, DayPeriod period, String note, LocalDate entryDate) {

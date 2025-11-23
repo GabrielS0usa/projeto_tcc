@@ -101,7 +101,6 @@ public class GeminiReportResponseManual {
         }
     }
 
-    // Getters and Setters
     public String getOverallAssessment() { return overallAssessment; }
     public void setOverallAssessment(String overallAssessment) { this.overallAssessment = overallAssessment; }
 

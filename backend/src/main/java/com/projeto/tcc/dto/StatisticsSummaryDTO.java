@@ -17,7 +17,6 @@ public class StatisticsSummaryDTO {
         this.averageQualityScore = averageQualityScore;
     }
 
-    // Getters and Setters
     public Double getTotalValue() { return totalValue; }
     public void setTotalValue(Double totalValue) { this.totalValue = totalValue; }
     public Long getTotalActivities() { return totalActivities; }

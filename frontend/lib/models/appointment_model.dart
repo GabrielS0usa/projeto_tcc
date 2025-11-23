@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 
 enum AppointmentType { consulta, exame }
 
@@ -43,7 +43,7 @@ class Appointment {
       'date': date.toIso8601String(),
       'doctor': doctor,
       'location': location,
-      'isCompleted': isCompleted, // ✅ campo alinhado com backend
+      'isCompleted': isCompleted,
     };
   }
 }

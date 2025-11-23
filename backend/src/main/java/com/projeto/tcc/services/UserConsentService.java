@@ -18,58 +18,55 @@ import com.projeto.tcc.repositories.UserRepository;
 @Service
 public class UserConsentService {
 
-    @Autowired
-    private ConsentRepository consentRepository;
+	@Autowired
+	private ConsentRepository consentRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    CaregiverRepository caregiverRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    @Transactional
-    public ConsentResponseDTO updateUserConsent(Long userId, ConsentRequestDTO request) {
+	@Autowired
+	CaregiverRepository caregiverRepository;
 
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+	@Transactional
+	public ConsentResponseDTO updateUserConsent(Long userId, ConsentRequestDTO request) {
 
-        Consent consent = user.getConsent();
-        if (consent == null) {
-            consent = new Consent();
-            consent.setUser(user);
-            user.setConsent(consent);
-        }
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-        consent.setDataSharing(request.dataSharing());
-        consent.setAnalytics(request.analytics());
-        consent.setNotifications(request.notifications());
-        consent.setLastUpdated(LocalDateTime.now());
-        consent.setActive(request.active());
+		Consent consent = user.getConsent();
+		if (consent == null) {
+			consent = new Consent();
+			consent.setUser(user);
+			user.setConsent(consent);
+		}
 
-        if (request.caregiverEmail() != null && !request.caregiverEmail().isBlank()) {
+		consent.setDataSharing(request.dataSharing());
+		consent.setAnalytics(request.analytics());
+		consent.setNotifications(request.notifications());
+		consent.setLastUpdated(LocalDateTime.now());
+		consent.setActive(request.active());
+
+		if (request.caregiverEmail() != null && !request.caregiverEmail().isBlank()) {
 			Caregiver caregiver = caregiverRepository.findByEmail(request.caregiverEmail())
-                .orElseThrow(() -> new RuntimeException("Caregiver not found"));
-            consent.setCaregiver(caregiver);
-        } else {
-            consent.setCaregiver(null);
-        }
+					.orElseThrow(() -> new RuntimeException("Caregiver not found"));
+			consent.setCaregiver(caregiver);
+		} else {
+			consent.setCaregiver(null);
+		}
 
-        consent = consentRepository.save(consent);
+		consent = consentRepository.save(consent);
 
-        return new ConsentResponseDTO(consent);
-    }
+		return new ConsentResponseDTO(consent);
+	}
 
+	@Transactional(readOnly = true)
+	public ConsentResponseDTO getUserConsent(Long userId) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-    @Transactional(readOnly = true)
-    public ConsentResponseDTO getUserConsent(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
+		Consent consent = user.getConsent();
+		if (consent == null) {
+			return new ConsentResponseDTO();
+		}
 
-        Consent consent = user.getConsent();
-        if (consent == null) {
-            return new ConsentResponseDTO();
-        }
-
-        return new ConsentResponseDTO(consent);
-    }
+		return new ConsentResponseDTO(consent);
+	}
 }

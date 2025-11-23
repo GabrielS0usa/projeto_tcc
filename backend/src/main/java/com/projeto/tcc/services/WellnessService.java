@@ -67,12 +67,13 @@ public class WellnessService {
 	
 	@Transactional
 	public GeminiReportResponse generateAndProcessDailyReport(String userId, LocalDate date) {
-	    GeminiReportResponse report = geminiService.generateDailyReport(userId.toString(), date);
-	    
+	    // Gera o relatório estruturado (JSON) ao invés do email
+	    GeminiReportResponse report = geminiService.generateDailyReport(userId, date);
+
 	    if (report.getRecommendations() != null) {
 	        @SuppressWarnings("unchecked")
 	        List<Object> rawList = (List<Object>) (List<?>) report.getRecommendations();
-	        
+
 	        List<String> stringRecommendations = rawList.stream()
 	            .map(rec -> {
 	                if (rec instanceof String) {
@@ -86,7 +87,7 @@ public class WellnessService {
 	                }
 	            })
 	            .collect(Collectors.toList());
-	        
+
 	        report.setRecommendations(stringRecommendations);
 	    }
 

@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import '../models/cognitive_activity.dart';
 
-import 'dart:convert'; 
-import '../services/api_service.dart'; 
-import 'package:http/http.dart' as http; 
+import 'dart:convert';
+import '../services/api_service.dart';
+import 'package:http/http.dart' as http;
 
 class CrosswordsScreen extends StatefulWidget {
   const CrosswordsScreen({Key? key}) : super(key: key);
@@ -28,43 +28,43 @@ class _CrosswordsScreenState extends State<CrosswordsScreen> {
   }
 
   Future<void> _loadCrosswords() async {
-  setState(() => _isLoading = true);
+    setState(() => _isLoading = true);
 
-  try {
-    final http.Response response = await _apiService.getCrosswordActivities();
+    try {
+      final http.Response response = await _apiService.getCrosswordActivities();
 
-    if (response.statusCode == 200) {
-      final List<dynamic> responseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = jsonDecode(response.body);
 
-      setState(() {
-        _crosswords = responseData
-            .map((json) => CrosswordActivity.fromJson(json))
-            .toList();
-        _isLoading = false;
-      });
-    } else {
-      print('Erro ao carregar dados: ${response.statusCode}');
-      print('Corpo: ${response.body}');
+        setState(() {
+          _crosswords = responseData
+              .map((json) => CrosswordActivity.fromJson(json))
+              .toList();
+          _isLoading = false;
+        });
+      } else {
+        print('Erro ao carregar dados: ${response.statusCode}');
+        print('Corpo: ${response.body}');
+        setState(() => _isLoading = false);
+        _showErrorSnackBar('Não foi possível carregar o histórico.');
+      }
+    } catch (e) {
+      print('Exceção ao carregar dados: $e');
       setState(() => _isLoading = false);
-      _showErrorSnackBar('Não foi possível carregar o histórico.');
+      _showErrorSnackBar('Erro de conexão. Tente novamente.');
     }
-  } catch (e) {
-    print('Exceção ao carregar dados: $e');
-    setState(() => _isLoading = false);
-    _showErrorSnackBar('Erro de conexão. Tente novamente.');
   }
-}
 
-void _showErrorSnackBar(String message) {
-  if (mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: VivaBemColors.vermelhoErro,
-      ),
-    );
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: VivaBemColors.vermelhoErro,
+        ),
+      );
+    }
   }
-}
 
   void _showAddDialog() {
     final puzzleNameController = TextEditingController();
@@ -77,7 +77,8 @@ void _showErrorSnackBar(String message) {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: VivaBemColors.cinzaEscuro,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Text(
             'Registrar Palavras Cruzadas',
             style: TextStyle(
@@ -162,58 +163,61 @@ void _showErrorSnackBar(String message) {
               ),
             ),
             ElevatedButton(
-          onPressed: () async { 
-            if (puzzleNameController.text.isEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Por favor, insira o nome do quebra-cabeça'),
-                  backgroundColor: VivaBemColors.vermelhoErro,
-                ),
-              );
-              return;
-            }
+              onPressed: () async {
+                if (puzzleNameController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Por favor, insira o nome do quebra-cabeça'),
+                      backgroundColor: VivaBemColors.vermelhoErro,
+                    ),
+                  );
+                  return;
+                }
 
-            final Map<String, dynamic> data = {
-              'puzzleName': puzzleNameController.text,
-              'difficulty': selectedDifficulty,
-              'date': DateTime.now().toIso8601String(), 
-              'timeSpentMinutes': int.tryParse(timeController.text) ?? 0,
-              'isCompleted': true,
-              'notes': notesController.text.isEmpty ? null : notesController.text,
-            };
+                final Map<String, dynamic> data = {
+                  'puzzleName': puzzleNameController.text,
+                  'difficulty': selectedDifficulty,
+                  'date': DateTime.now().toIso8601String(),
+                  'timeSpentMinutes': int.tryParse(timeController.text) ?? 0,
+                  'isCompleted': true,
+                  'notes': notesController.text.isEmpty
+                      ? null
+                      : notesController.text,
+                };
 
-            try {
-              final http.Response response = await _apiService.createCrosswordActivity(data);
+                try {
+                  final http.Response response =
+                      await _apiService.createCrosswordActivity(data);
 
-              if (response.statusCode == 201) { 
-                final newCrossword = CrosswordActivity.fromJson(jsonDecode(response.body));
+                  if (response.statusCode == 201) {
+                    final newCrossword =
+                        CrosswordActivity.fromJson(jsonDecode(response.body));
 
-                
-                setState(() {
-                  _crosswords.insert(0, newCrossword);
-                });
+                    setState(() {
+                      _crosswords.insert(0, newCrossword);
+                    });
 
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Palavras cruzadas registradas! 🎉'),
-                    backgroundColor: ActiveMindPalete.verdeProgresso,
-                  ),
-                );
-              } else {
-          
-                Navigator.pop(context);
-                _showErrorSnackBar('Erro ao salvar: ${response.body}');
-              }
-            } catch (e) {
-              
-              Navigator.pop(context);
-              _showErrorSnackBar('Erro de conexão. Tente novamente.');
-            }
-          },
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Palavras cruzadas registradas! 🎉'),
+                        backgroundColor: ActiveMindPalete.verdeProgresso,
+                      ),
+                    );
+                  } else {
+                    Navigator.pop(context);
+                    _showErrorSnackBar('Erro ao salvar: ${response.body}');
+                  }
+                } catch (e) {
+                  Navigator.pop(context);
+                  _showErrorSnackBar('Erro de conexão. Tente novamente.');
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ActiveMindPalete.azulPalavrasCruzadas,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -241,7 +245,7 @@ void _showErrorSnackBar(String message) {
   }) {
     final isSelected = value == selectedValue;
     Color color;
-    
+
     switch (value) {
       case 'easy':
         color = const Color(0xFF4CAF50);
@@ -493,7 +497,7 @@ void _showErrorSnackBar(String message) {
 
   Widget _buildCrosswordCard(CrosswordActivity crossword) {
     final difficultyColor = crossword.getDifficultyColor();
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),

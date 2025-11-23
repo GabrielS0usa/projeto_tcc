@@ -13,7 +13,6 @@ public class ActivityTrendDTO {
         this.count = count;
     }
 
-    // Getters and Setters
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
     public Double getAverageValue() { return averageValue; }

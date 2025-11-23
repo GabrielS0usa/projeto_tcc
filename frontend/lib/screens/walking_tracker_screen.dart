@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../theme/app_colors.dart';
-import '../models/physical_activity.dart';
-import '../services/api_service.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class WalkingTrackerScreen extends StatefulWidget {
   const WalkingTrackerScreen({Key? key}) : super(key: key);
