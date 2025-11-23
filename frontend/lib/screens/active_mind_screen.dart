@@ -27,11 +27,11 @@ class _ActiveMindScreenState extends State<ActiveMindScreen> {
 
   Future<void> _loadStats() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final apiService = ApiService();
       final response = await apiService.getCognitiveStats();
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {

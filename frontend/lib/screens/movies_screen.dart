@@ -1,13 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:projeto/services/api_service.dart';
-import '../theme/app_colors.dart';
-import '../models/cognitive_activity.dart';
 
-import 'dart:convert';
-import '../services/api_service.dart';
-import 'package:http/http.dart' as http;
+import '../models/cognitive_activity.dart';
+import '../theme/app_colors.dart';
 
 class MoviesScreen extends StatefulWidget {
   const MoviesScreen({Key? key}) : super(key: key);
@@ -182,7 +182,7 @@ class _MoviesScreenState extends State<MoviesScreen> {
 
                 if (response.statusCode == 201 || response.statusCode == 200) {
                   Navigator.pop(context);
-                  _loadMovies(); 
+                  _loadMovies();
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

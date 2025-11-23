@@ -14,11 +14,9 @@ public class GeminiReportResponse {
     private List<String> recommendations;
     private String motivationalMessage;
     private LocalDateTime generatedAt;
-
-    // Construtor privado para forçar o uso do Builder
+    
     private GeminiReportResponse() {}
 
-    // Getters
     public String getOverallAssessment() { return overallAssessment; }
     public Map<String, String> getHealthMetricsAnalysis() { return healthMetricsAnalysis; }
     public String getMedicationAdherence() { return medicationAdherence; }
@@ -83,7 +81,6 @@ public class GeminiReportResponse {
         }
     }
 
-    // Método estático para iniciar o Builder
     public static Builder builder() {
         return new Builder();
     }

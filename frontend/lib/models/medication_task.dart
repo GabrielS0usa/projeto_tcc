@@ -1,5 +1,3 @@
-// lib/models/medication_task.dart
-
 class MedicationTask {
   final int taskId; 
   final int medicineId;

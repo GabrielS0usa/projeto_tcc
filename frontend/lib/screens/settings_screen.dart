@@ -1,13 +1,13 @@
-// lib/screens/settings_screen.dart
-
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../theme/app_colors.dart';
-import '../services/api_service.dart';
+
 import '../models/user_profile.dart';
 import '../screens/edit_profile_screen.dart';
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -77,7 +77,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    // Verifica se o consentimento está ativo
     if (!(_userProfile?.reportingConsent ?? false)) {
       _showWarningDialog(
         'Relatórios Desativados',
@@ -86,8 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    // Verifica se há email de cuidador cadastrado
-    if (_userProfile?.emailCaregiver == null || 
+    if (_userProfile?.emailCaregiver == null ||
         _userProfile!.emailCaregiver!.isEmpty) {
       _showWarningDialog(
         'Email Não Cadastrado',
@@ -96,7 +94,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       return;
     }
 
-    // Confirma o envio
     final confirmed = await _showConfirmDialog(
       'Enviar Relatório Diário',
       'Deseja enviar o relatório de hoje para ${_userProfile!.emailCaregiver}?',
@@ -119,7 +116,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         throw Exception('ID do usuário inválido');
       }
 
-      // Chama o endpoint para gerar e enviar o relatório
       final response = await _apiService.sendDailyReport(userId: userId);
 
       if (!mounted) return;
@@ -130,7 +126,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'O relatório diário foi enviado com sucesso para ${_userProfile!.emailCaregiver}',
         );
       } else {
-        final errorMessage = response.body.isNotEmpty 
+        final errorMessage = response.body.isNotEmpty
             ? jsonDecode(response.body)['message'] ?? 'Erro desconhecido'
             : 'Falha ao enviar relatório';
         throw Exception(errorMessage);

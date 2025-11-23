@@ -35,125 +35,104 @@ import com.projeto.tcc.repositories.WellnessRepository;
 @Service
 public class DailyDataAggregatorManual {
 
-    private final UserRepository userRepository;
-    private final WellnessRepository wellnessRepository;
-    private final NutritionalEntryRepository nutritionalEntryRepository;
-    private final PhysicalActivityRepository physicalActivityRepository;
-    private final WalkingSessionRepository walkingSessionRepository;
-    private final DailyExerciseGoalRepository dailyExerciseGoalRepository;
-    private final MedicationTaskRepository medicationTaskRepository;
-    private final MedicineRepository medicineRepository;
-    private final AppointmentRepository appointmentRepository;
-    private final ReadingActivityRepository readingActivityRepository;
-    private final CrosswordActivityRepository crosswordActivityRepository;
-    private final MovieActivityRepository movieActivityRepository;
+	private final UserRepository userRepository;
+	private final WellnessRepository wellnessRepository;
+	private final NutritionalEntryRepository nutritionalEntryRepository;
+	private final PhysicalActivityRepository physicalActivityRepository;
+	private final WalkingSessionRepository walkingSessionRepository;
+	private final DailyExerciseGoalRepository dailyExerciseGoalRepository;
+	private final MedicationTaskRepository medicationTaskRepository;
+	private final MedicineRepository medicineRepository;
+	private final AppointmentRepository appointmentRepository;
+	private final ReadingActivityRepository readingActivityRepository;
+	private final CrosswordActivityRepository crosswordActivityRepository;
+	private final MovieActivityRepository movieActivityRepository;
 
-    @Autowired
-    public DailyDataAggregatorManual(UserRepository userRepository, WellnessRepository wellnessRepository,
-                                   NutritionalEntryRepository nutritionalEntryRepository,
-                                   PhysicalActivityRepository physicalActivityRepository,
-                                   WalkingSessionRepository walkingSessionRepository,
-                                   DailyExerciseGoalRepository dailyExerciseGoalRepository,
-                                   MedicationTaskRepository medicationTaskRepository,
-                                   MedicineRepository medicineRepository,
-                                   AppointmentRepository appointmentRepository,
-                                   ReadingActivityRepository readingActivityRepository,
-                                   CrosswordActivityRepository crosswordActivityRepository,
-                                   MovieActivityRepository movieActivityRepository) {
-        this.userRepository = userRepository;
-        this.wellnessRepository = wellnessRepository;
-        this.nutritionalEntryRepository = nutritionalEntryRepository;
-        this.physicalActivityRepository = physicalActivityRepository;
-        this.walkingSessionRepository = walkingSessionRepository;
-        this.dailyExerciseGoalRepository = dailyExerciseGoalRepository;
-        this.medicationTaskRepository = medicationTaskRepository;
-        this.medicineRepository = medicineRepository;
-        this.appointmentRepository = appointmentRepository;
-        this.readingActivityRepository = readingActivityRepository;
-        this.crosswordActivityRepository = crosswordActivityRepository;
-        this.movieActivityRepository = movieActivityRepository;
-    }
+	@Autowired
+	public DailyDataAggregatorManual(UserRepository userRepository, WellnessRepository wellnessRepository,
+			NutritionalEntryRepository nutritionalEntryRepository,
+			PhysicalActivityRepository physicalActivityRepository, WalkingSessionRepository walkingSessionRepository,
+			DailyExerciseGoalRepository dailyExerciseGoalRepository, MedicationTaskRepository medicationTaskRepository,
+			MedicineRepository medicineRepository, AppointmentRepository appointmentRepository,
+			ReadingActivityRepository readingActivityRepository,
+			CrosswordActivityRepository crosswordActivityRepository, MovieActivityRepository movieActivityRepository) {
+		this.userRepository = userRepository;
+		this.wellnessRepository = wellnessRepository;
+		this.nutritionalEntryRepository = nutritionalEntryRepository;
+		this.physicalActivityRepository = physicalActivityRepository;
+		this.walkingSessionRepository = walkingSessionRepository;
+		this.dailyExerciseGoalRepository = dailyExerciseGoalRepository;
+		this.medicationTaskRepository = medicationTaskRepository;
+		this.medicineRepository = medicineRepository;
+		this.appointmentRepository = appointmentRepository;
+		this.readingActivityRepository = readingActivityRepository;
+		this.crosswordActivityRepository = crosswordActivityRepository;
+		this.movieActivityRepository = movieActivityRepository;
+	}
 
-    public DailyDataBundleManual aggregateDailyData(String userId, LocalDate date) {
-        User user = userRepository.findById(Long.valueOf(userId))
-            .orElseThrow(() -> new RuntimeException("User not found"));
+	public DailyDataBundleManual aggregateDailyData(String userId, LocalDate date) {
+		User user = userRepository.findById(Long.valueOf(userId))
+				.orElseThrow(() -> new RuntimeException("User not found"));
 
-        return DailyDataBundleManual.builder()
-            .user(user)
-            .wellness(findWellnessByUserAndDate(user, date))
-            .nutritionalEntries(findNutritionalEntriesByUserAndDate(user, date))
-            .physicalActivities(findPhysicalActivitiesByUserAndDate(user, date))
-            .walkingSessions(findWalkingSessionsByUserAndDate(user, date))
-            .exerciseGoals(findExerciseGoalsByUserAndDate(user, date))
-            .medicationTasks(findMedicationTasksByUserAndDate(user, date))
-            .medicines(findMedicinesByUser(user))
-            .appointments(findAppointmentsByUserAndDate(user, date))
-            .readingActivities(findReadingActivitiesByUserAndDate(user, date))
-            .crosswordActivities(findCrosswordActivitiesByUserAndDate(user, date))
-            .movieActivities(findMovieActivitiesByUserAndDate(user, date))
-            .build();
-    }
+		return DailyDataBundleManual.builder().user(user).wellness(findWellnessByUserAndDate(user, date))
+				.nutritionalEntries(findNutritionalEntriesByUserAndDate(user, date))
+				.physicalActivities(findPhysicalActivitiesByUserAndDate(user, date))
+				.walkingSessions(findWalkingSessionsByUserAndDate(user, date))
+				.exerciseGoals(findExerciseGoalsByUserAndDate(user, date))
+				.medicationTasks(findMedicationTasksByUserAndDate(user, date)).medicines(findMedicinesByUser(user))
+				.appointments(findAppointmentsByUserAndDate(user, date))
+				.readingActivities(findReadingActivitiesByUserAndDate(user, date))
+				.crosswordActivities(findCrosswordActivitiesByUserAndDate(user, date))
+				.movieActivities(findMovieActivitiesByUserAndDate(user, date)).build();
+	}
 
-    private Wellness findWellnessByUserAndDate(User user, LocalDate date) {
-        List<Wellness> wellnessList = wellnessRepository.findByUserAndEntryDate(user, date);
-        return wellnessList.isEmpty() ? null : wellnessList.get(0);
-    }
+	private Wellness findWellnessByUserAndDate(User user, LocalDate date) {
+		List<Wellness> wellnessList = wellnessRepository.findByUserAndEntryDate(user, date);
+		return wellnessList.isEmpty() ? null : wellnessList.get(0);
+	}
 
-    private List<NutritionalEntry> findNutritionalEntriesByUserAndDate(User user, LocalDate date) {
-        return nutritionalEntryRepository.findByUserAndDateEquals(user, date);
-    }
+	private List<NutritionalEntry> findNutritionalEntriesByUserAndDate(User user, LocalDate date) {
+		return nutritionalEntryRepository.findByUserAndDateEquals(user, date);
+	}
 
-    private List<PhysicalActivityEntity> findPhysicalActivitiesByUserAndDate(User user, LocalDate date) {
-        return physicalActivityRepository.findByUserAndDateBetween(user, date, date);
-    }
+	private List<PhysicalActivityEntity> findPhysicalActivitiesByUserAndDate(User user, LocalDate date) {
+		return physicalActivityRepository.findByUserAndDateBetween(user, date, date);
+	}
 
-    private List<WalkingSession> findWalkingSessionsByUserAndDate(User user, LocalDate date) {
-        return walkingSessionRepository.findByUserAndStartTimeBetweenOrderByStartTimeDesc(
-            user,
-            date.atStartOfDay(),
-            date.atTime(23, 59, 59)
-        );
-    }
+	private List<WalkingSession> findWalkingSessionsByUserAndDate(User user, LocalDate date) {
+		return walkingSessionRepository.findByUserAndStartTimeBetweenOrderByStartTimeDesc(user, date.atStartOfDay(),
+				date.atTime(23, 59, 59));
+	}
 
-    private DailyExerciseGoal findExerciseGoalsByUserAndDate(User user, LocalDate date) {
-        return dailyExerciseGoalRepository.findByUserAndDate(user, date).orElse(null);
-    }
+	private DailyExerciseGoal findExerciseGoalsByUserAndDate(User user, LocalDate date) {
+		return dailyExerciseGoalRepository.findByUserAndDate(user, date).orElse(null);
+	}
 
-    private List<MedicationTask> findMedicationTasksByUserAndDate(User user, LocalDate date) {
-        // This is a simplified implementation - in practice, you'd need to filter by date
-        // For now, returning all medication tasks for the user's medicines
-        return medicationTaskRepository.findAll().stream()
-            .filter(task -> task.getMedicine().getUser().getId().equals(user.getId()))
-            .toList();
-    }
+	private List<MedicationTask> findMedicationTasksByUserAndDate(User user, LocalDate date) {
+		return medicationTaskRepository.findAll().stream()
+				.filter(task -> task.getMedicine().getUser().getId().equals(user.getId())).toList();
+	}
 
-    private List<Medicine> findMedicinesByUser(User user) {
-        return medicineRepository.findByUser(user);
-    }
+	private List<Medicine> findMedicinesByUser(User user) {
+		return medicineRepository.findByUser(user);
+	}
 
-    private List<Appointment> findAppointmentsByUserAndDate(User user, LocalDate date) {
-        return appointmentRepository.findByUserAndDateBetween(
-            user,
-            date.atStartOfDay(),
-            date.atTime(23, 59, 59)
-        );
-    }
+	private List<Appointment> findAppointmentsByUserAndDate(User user, LocalDate date) {
+		return appointmentRepository.findByUserAndDateBetween(user, date.atStartOfDay(), date.atTime(23, 59, 59));
+	}
 
-    private List<ReadingActivity> findReadingActivitiesByUserAndDate(User user, LocalDate date) {
-        return readingActivityRepository.findByUserOrderByStartDateDesc(user).stream()
-            .filter(activity -> activity.getStartDate().equals(date))
-            .toList();
-    }
+	private List<ReadingActivity> findReadingActivitiesByUserAndDate(User user, LocalDate date) {
+		return readingActivityRepository.findByUserOrderByStartDateDesc(user).stream()
+				.filter(activity -> activity.getStartDate().equals(date)).toList();
+	}
 
-    private List<CrosswordActivity> findCrosswordActivitiesByUserAndDate(User user, LocalDate date) {
-        return crosswordActivityRepository.findByUserOrderByDateDesc(user).stream()
-            .filter(activity -> activity.getDate().equals(date))
-            .toList();
-    }
+	private List<CrosswordActivity> findCrosswordActivitiesByUserAndDate(User user, LocalDate date) {
+		return crosswordActivityRepository.findByUserOrderByDateDesc(user).stream()
+				.filter(activity -> activity.getDate().equals(date)).toList();
+	}
 
-    private List<MovieActivity> findMovieActivitiesByUserAndDate(User user, LocalDate date) {
-        return movieActivityRepository.findByUserOrderByWatchDateDesc(user).stream()
-            .filter(activity -> activity.getWatchDate().equals(date))
-            .toList();
-    }
+	private List<MovieActivity> findMovieActivitiesByUserAndDate(User user, LocalDate date) {
+		return movieActivityRepository.findByUserOrderByWatchDateDesc(user).stream()
+				.filter(activity -> activity.getWatchDate().equals(date)).toList();
+	}
 }

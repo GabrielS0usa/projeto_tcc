@@ -1,12 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import '../theme/app_colors.dart';
+
 import '../models/physical_activity.dart';
-import 'dart:convert'; 
-import '../services/api_service.dart'; 
-import 'package:http/http.dart' as http; 
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class ExerciseHistoryScreen extends StatefulWidget {
   const ExerciseHistoryScreen({Key? key}) : super(key: key);
@@ -24,7 +24,6 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
 
   final ApiService _apiService = ApiService();
 
-  
   @override
   void initState() {
     super.initState();
@@ -43,15 +42,15 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
       final summaryResponse = responses[0];
       final sessionsResponse = responses[1];
 
-      if (summaryResponse.statusCode == 200 && sessionsResponse.statusCode == 200) {
-        
+      if (summaryResponse.statusCode == 200 &&
+          sessionsResponse.statusCode == 200) {
         final summaryData = jsonDecode(utf8.decode(summaryResponse.bodyBytes));
         final newWeeklySummary = WeeklyExerciseSummary.fromJson(summaryData);
 
-        final List<dynamic> sessionsData = jsonDecode(utf8.decode(sessionsResponse.bodyBytes));
-        final newSessions = sessionsData
-            .map((json) => WalkingSession.fromJson(json))
-            .toList();
+        final List<dynamic> sessionsData =
+            jsonDecode(utf8.decode(sessionsResponse.bodyBytes));
+        final newSessions =
+            sessionsData.map((json) => WalkingSession.fromJson(json)).toList();
 
         setState(() {
           _weeklySummary = newWeeklySummary;
@@ -134,7 +133,8 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
                     if (selectedDaySessions.isEmpty)
                       _buildEmptyState()
                     else
-                      ...selectedDaySessions.map((session) => _buildSessionCard(session)),
+                      ...selectedDaySessions
+                          .map((session) => _buildSessionCard(session)),
                   ],
                 ),
               ),
@@ -405,7 +405,8 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.3),
+                  color:
+                      PhysicalExercisesPalete.laranjaCaminhada.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -439,7 +440,8 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: PhysicalExercisesPalete.verdeObjetivo.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -496,7 +498,8 @@ class _ExerciseHistoryScreenState extends State<ExerciseHistoryScreen> {
                 child: _buildSessionStat(
                   icon: Icons.speed,
                   label: 'Ritmo',
-                  value: '${(session.distanceKm / (session.durationMinutes / 60)).toStringAsFixed(1)} km/h',
+                  value:
+                      '${(session.distanceKm / (session.durationMinutes / 60)).toStringAsFixed(1)} km/h',
                   color: PhysicalExercisesPalete.roxoEnergia,
                 ),
               ),

@@ -124,7 +124,6 @@ public class DailyDataBundleManual {
         }
     }
 
-    // Getters
     public User getUser() { return user; }
     public Wellness getWellness() { return wellness; }
     public List<NutritionalEntry> getNutritionalEntries() { return nutritionalEntries; }

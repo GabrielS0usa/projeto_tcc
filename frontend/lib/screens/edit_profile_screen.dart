@@ -38,7 +38,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Verificar se o ID existe antes de tentar salvar
     if (widget.user.id == null) {
       _showError("Erro: Usuário sem ID. Faça login novamente.");
       return;
@@ -55,18 +54,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       "caregiverEmail": _caregiverEmailController.text.trim().isEmpty
           ? null
           : _caregiverEmailController.text.trim(),
-      "preferences": null 
+      "preferences": null
     };
 
     try {
       final res = await _apiService.updateUserProfile(
-        userId: widget.user.id!, // Agora é seguro usar o operador !
+        userId: widget.user.id!,
         data: body,
       );
 
       if (res.statusCode == 200) {
         final updatedUser = widget.user.copyWith(
-          id: widget.user.id, // ← Mantém o ID original do usuário
+          id: widget.user.id,
           name: body["name"],
           email: body["email"],
           nameCaregiver: body["caregiverName"],
@@ -114,7 +113,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                // Nome
                 TextFormField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
@@ -123,8 +121,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       v == null || v.isEmpty ? "Informe seu nome" : null,
                 ),
                 const SizedBox(height: 20),
-
-                // Email
                 TextFormField(
                   controller: _emailController,
                   style: const TextStyle(color: Colors.white),
@@ -136,8 +132,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   },
                 ),
                 const SizedBox(height: 30),
-
-                // Título do bloco
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -150,16 +144,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // Nome cuidador
                 TextFormField(
                   controller: _caregiverNameController,
                   style: const TextStyle(color: Colors.white),
                   decoration: _inputDecoration("Nome do cuidador (opcional)"),
                 ),
                 const SizedBox(height: 20),
-
-                // Email cuidador
                 TextFormField(
                   controller: _caregiverEmailController,
                   style: const TextStyle(color: Colors.white),
@@ -171,10 +161,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 40),
-
-                // Botão salvar
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(

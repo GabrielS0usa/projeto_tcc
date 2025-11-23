@@ -1,5 +1,3 @@
-// lib/models/medicine_model.dart
-
 class Medicine {
   final int id;
   final String name;

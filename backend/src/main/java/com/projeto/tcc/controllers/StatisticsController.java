@@ -39,14 +39,12 @@ public class StatisticsController {
 
     @GetMapping("/stats/user-stats")
     public ResponseEntity<UserStatisticsDTO> getUserStats() {
-        // For now, using userId 1 as default. In production, get from JWT token
         UserStatisticsDTO statistics = statisticsService.getUserStatistics(1L);
         return ResponseEntity.ok(statistics);
     }
 
     @GetMapping("/stats/weekly-progress")
     public ResponseEntity<UserStatisticsDTO> getWeeklyProgress() {
-        // For now, using userId 1 as default. In production, get from JWT token
         UserStatisticsDTO statistics = statisticsService.getUserStatistics(1L);
         return ResponseEntity.ok(statistics);
     }

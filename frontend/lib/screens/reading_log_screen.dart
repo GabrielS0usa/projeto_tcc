@@ -1,10 +1,12 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../theme/app_colors.dart';
+
 import '../models/cognitive_activity.dart';
 import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class ReadingLogScreen extends StatefulWidget {
   const ReadingLogScreen({Key? key}) : super(key: key);
@@ -25,15 +27,16 @@ class _ReadingLogScreenState extends State<ReadingLogScreen> {
 
   Future<void> _loadReadings() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final apiService = ApiService();
       final response = await apiService.getReadingActivities();
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {
-          _readings = data.map((json) => ReadingActivity.fromJson(json)).toList();
+          _readings =
+              data.map((json) => ReadingActivity.fromJson(json)).toList();
           _isLoading = false;
         });
       } else {
@@ -119,7 +122,8 @@ class _ReadingLogScreenState extends State<ReadingLogScreen> {
 
   void _showAddEditDialog({ReadingActivity? reading}) {
     final isEditing = reading != null;
-    final titleController = TextEditingController(text: reading?.bookTitle ?? '');
+    final titleController =
+        TextEditingController(text: reading?.bookTitle ?? '');
     final authorController = TextEditingController(text: reading?.author ?? '');
     final totalPagesController = TextEditingController(
       text: reading?.totalPages.toString() ?? '',
@@ -250,15 +254,18 @@ class _ReadingLogScreenState extends State<ReadingLogScreen> {
         fillColor: VivaBemColors.branco.withOpacity(0.05),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: ActiveMindPalete.roxoLeitura.withOpacity(0.3)),
+          borderSide:
+              BorderSide(color: ActiveMindPalete.roxoLeitura.withOpacity(0.3)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: ActiveMindPalete.roxoLeitura.withOpacity(0.3)),
+          borderSide:
+              BorderSide(color: ActiveMindPalete.roxoLeitura.withOpacity(0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: ActiveMindPalete.roxoLeitura, width: 2),
+          borderSide:
+              const BorderSide(color: ActiveMindPalete.roxoLeitura, width: 2),
         ),
       ),
     );
@@ -351,7 +358,7 @@ class _ReadingLogScreenState extends State<ReadingLogScreen> {
 
   Widget _buildReadingCard(ReadingActivity reading) {
     final progress = reading.progressPercentage;
-    
+
     return GestureDetector(
       onTap: () => _showAddEditDialog(reading: reading),
       child: Container(

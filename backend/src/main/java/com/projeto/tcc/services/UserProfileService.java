@@ -23,41 +23,31 @@ public class UserProfileService {
 	@Transactional
 	public UserProfileDTO updateUserProfile(Long userId, UserUpdateRequest request) {
 
-	    User user = userRepository.findById(userId)
-	            .orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-	    user.setName(request.getName());
-	    user.setEmail(request.getEmail());
+		user.setName(request.getName());
+		user.setEmail(request.getEmail());
 
-	    Caregiver caregiver = null;
+		Caregiver caregiver = null;
 
-	    if (request.getCaregiverEmail() != null && !request.getCaregiverEmail().isBlank()) {
+		if (request.getCaregiverEmail() != null && !request.getCaregiverEmail().isBlank()) {
 
-	        caregiver = caregiverRepository
-	                .findByEmail(request.getCaregiverEmail())
-	                .orElseGet(() -> new Caregiver());
+			caregiver = caregiverRepository.findByEmail(request.getCaregiverEmail()).orElseGet(() -> new Caregiver());
 
-	        caregiver.setName(request.getCaregiverName());
-	        caregiver.setEmail(request.getCaregiverEmail());
-	        caregiver.setUser(user);
+			caregiver.setName(request.getCaregiverName());
+			caregiver.setEmail(request.getCaregiverEmail());
+			caregiver.setUser(user);
 
-	        caregiverRepository.save(caregiver);
+			caregiverRepository.save(caregiver);
 
-	        user.setCaregiver(caregiver);
-	    }
+			user.setCaregiver(caregiver);
+		}
 
-	    user = userRepository.save(user);
+		user = userRepository.save(user);
 
-	    return new UserProfileDTO(
-	            user.getName(),
-	            user.getEmail(),
-	            user.getPhone(),
-	            user.getBirthDate(),
-	            caregiver != null ? caregiver.getName() : null,
-	            caregiver != null ? caregiver.getEmail() : null
-	    );
+		return new UserProfileDTO(user.getName(), user.getEmail(), user.getPhone(), user.getBirthDate(),
+				caregiver != null ? caregiver.getName() : null, caregiver != null ? caregiver.getEmail() : null);
 	}
-
 
 	@Transactional(readOnly = true)
 	public UserProfileDTO getUserProfile(Long userId) {

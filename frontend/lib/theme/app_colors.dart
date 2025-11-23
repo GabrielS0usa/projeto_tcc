@@ -3,21 +3,16 @@ import 'package:flutter/material.dart';
 class VivaBemColors {
   VivaBemColors._();
 
-  // --- Cores Neutras e de Base ---
   static const Color branco = Color(0xFFFFFFFF);
   static const Color cinzaClaro = Color(0xFFF5F5F5);
   static const Color cinzaEscuro = Color(0xFF333333);
   static const Color azulMarinho = Color(0xFF0F3D72);
-
-  // --- Cores Vibrantes para Botões e Destaques ---
   static const Color amareloDourado = Color(0xFFF7B300);
   static const Color vermelhoVibrante = Color(0xDCDCDC05);
   static const Color azulRoyal = Color(0xDF090FB5);
   static const Color rosaVibrante = Color(0xFFEE2C8A);
   static const Color laranjaVibrante = Color(0xFFDC411E);
   static const Color verdeEsmeralda = Color(0xF925B05F);
-
-  // --- Cores de Feedback e Status ---
   static const Color verdeConfirmacao = Color(0xFF4CAF50);
   static const Color vermelhoErro = Color(0xFF9B0404);
 }
@@ -64,21 +59,21 @@ class MedicinePalete {
 class ActiveMindPalete {
   ActiveMindPalete._();
 
-  static const Color azulPrincipal = Color(0xDF090FB5); // Blue Royal from main
-  static const Color roxoLeitura = Color(0xFF7B68EE); // Medium slate blue for reading
-  static const Color azulPalavrasCruzadas = Color(0xFF4169E1); // Royal blue for crosswords
-  static const Color rosaFilmes = Color(0xFFEE2C8A); // Pink for movies
-  static const Color verdeProgresso = Color(0xFF4CAF50); // Green for completion
-  static const Color amareloDestaque = Color(0xFFF7B300); // Yellow for highlights
+  static const Color azulPrincipal = Color(0xDF090FB5);
+  static const Color roxoLeitura = Color(0xFF7B68EE);
+  static const Color azulPalavrasCruzadas = Color(0xFF4169E1);
+  static const Color rosaFilmes = Color(0xFFEE2C8A);
+  static const Color verdeProgresso = Color(0xFF4CAF50);
+  static const Color amareloDestaque = Color(0xFFF7B300);
 }
 
 class PhysicalExercisesPalete {
   PhysicalExercisesPalete._();
 
-  static const Color rosaPrincipal = Color(0xFFEE2C8A); // Pink from main
-  static const Color laranjaCaminhada = Color(0xFFDC411E); // Orange for walking
-  static const Color verdeObjetivo = Color(0xFF4CAF50); // Green for goal completion
-  static const Color azulDistancia = Color(0xFF3E83B5); // Blue for distance
-  static const Color amareloTempo = Color(0xFFF7B300); // Yellow for time
-  static const Color roxoEnergia = Color(0xFF9B59B6); // Purple for energy
+  static const Color rosaPrincipal = Color(0xFFEE2C8A);
+  static const Color laranjaCaminhada = Color(0xFFDC411E);
+  static const Color verdeObjetivo = Color(0xFF4CAF50);
+  static const Color azulDistancia = Color(0xFF3E83B5);
+  static const Color amareloTempo = Color(0xFFF7B300);
+  static const Color roxoEnergia = Color(0xFF9B59B6);
 }

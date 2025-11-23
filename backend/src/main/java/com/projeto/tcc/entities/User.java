@@ -24,128 +24,124 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
-
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "tb_user")
 public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String name;
 
-    @Column(unique = true)
-    private String email;
-    private String phone;
-    private LocalDate birthDate;
-    private String password;
-    
-    @OneToMany(mappedBy = "user") 
-    private List<Activity> activities = new ArrayList<>();
-    
-    
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Consent consent;
-    
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Caregiver caregiver;
-    
-    @ManyToMany
-    @JoinTable(name = "tb_user_role",
-    		joinColumns = @JoinColumn(name = "user_id"),
-    		inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+	@Column(unique = true)
+	private String email;
+	private String phone;
+	private LocalDate birthDate;
+	private String password;
 
-    public User() {
-    }
+	@OneToMany(mappedBy = "user")
+	private List<Activity> activities = new ArrayList<>();
 
-    public User(Long id, String name, String email, String phone, LocalDate birthDate, String password) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-        this.birthDate = birthDate;
-        this.password = password;
-    }
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Consent consent;
 
-    public Long getId() {
-        return id;
-    }
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Caregiver caregiver;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@ManyToMany
+	@JoinTable(name = "tb_user_role", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+	private Set<Role> roles = new HashSet<>();
 
-    public String getName() {
-        return name;
-    }
+	public User() {
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public User(Long id, String name, String email, String phone, LocalDate birthDate, String password) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.phone = phone;
+		this.birthDate = birthDate;
+		this.password = password;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
-	
+
 	public Set<Role> getRoles() {
 		return roles;
 	}
-	
+
 	public void addRole(Role role) {
-    	roles.add(role);
-    }
-	
+		roles.add(role);
+	}
+
 	public Consent getConsent() {
-        return consent;
-    }
+		return consent;
+	}
 
-    public void setConsent(Consent consent) {
-        this.consent = consent;
-    }
+	public void setConsent(Consent consent) {
+		this.consent = consent;
+	}
 
-    public List<Activity> getActivities() {
-        return activities;
-    }
+	public List<Activity> getActivities() {
+		return activities;
+	}
 
-    public void setActivities(List<Activity> activities) {
-        this.activities = activities;
-    }
-    
-    public Caregiver getCaregiver() {
+	public void setActivities(List<Activity> activities) {
+		this.activities = activities;
+	}
+
+	public Caregiver getCaregiver() {
 		return caregiver;
 	}
 
@@ -154,28 +150,30 @@ public class User implements UserDetails {
 	}
 
 	public boolean hasRole(String roleName) {
-    	for(Role role : roles) {
-    		if (role.getAuthority().equals(roleName)) {
-    			return true;
-    		}
-    	}
-    	return false;
-    }
+		for (Role role : roles) {
+			if (role.getAuthority().equals(roleName)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
 
-        User user = (User) o;
+		User user = (User) o;
 
-        return Objects.equals(id, user.id);
-    }
+		return Objects.equals(id, user.id);
+	}
 
-    @Override
-    public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
+	@Override
+	public int hashCode() {
+		return id != null ? id.hashCode() : 0;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -15,59 +15,60 @@ import com.projeto.tcc.entities.Wellness;
 import com.projeto.tcc.repositories.CaregiverRepository;
 import com.projeto.tcc.repositories.MedicationTaskRepository;
 import com.projeto.tcc.repositories.UserRepository;
-import com.projeto.tcc.repositories.WellnessRepository; 
+import com.projeto.tcc.repositories.WellnessRepository;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private MedicationTaskRepository medicationTaskRepository; 
-    @Autowired
-    private WellnessRepository wellnessRepository; 
-    @Autowired
-    private MedicineService medicineService; 
-    
-    @Autowired
-    private CaregiverRepository caregiverRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private MedicationTaskRepository medicationTaskRepository;
+	@Autowired
+	private WellnessRepository wellnessRepository;
+	@Autowired
+	private MedicineService medicineService;
 
-    public UserProfileDTO getUserProfile() {
-        User user = getCurrentUser();
-        User newUser = userRepository.findByEmail(user.getEmail()).get();
-        Caregiver caregiver = caregiverRepository.findByUser(newUser).orElse(null);
+	@Autowired
+	private CaregiverRepository caregiverRepository;
 
-        String caregiverName = (caregiver != null) ? caregiver.getName() : null;
-        String caregiverEmail = (caregiver != null) ? caregiver.getEmail() : null;
-        return new UserProfileDTO(user.getName(), user.getEmail(), user.getPhone(), user.getBirthDate(), caregiverName, caregiverEmail);
-    }
+	public UserProfileDTO getUserProfile() {
+		User user = getCurrentUser();
+		User newUser = userRepository.findByEmail(user.getEmail()).get();
+		Caregiver caregiver = caregiverRepository.findByUser(newUser).orElse(null);
 
-    public ProgressDTO getTodayProgress() {
-        User user = getCurrentUser();
-        LocalDate today = LocalDate.now();
+		String caregiverName = (caregiver != null) ? caregiver.getName() : null;
+		String caregiverEmail = (caregiver != null) ? caregiver.getEmail() : null;
+		return new UserProfileDTO(user.getName(), user.getEmail(), user.getPhone(), user.getBirthDate(), caregiverName,
+				caregiverEmail);
+	}
 
-        List<com.projeto.tcc.dto.MedicationTaskDTO> medicineTasks = medicineService.findTodayTasks();
-        int totalMedicineTasks = medicineTasks.size();
-        int completedMedicineTasks = (int) medicineTasks.stream().filter(com.projeto.tcc.dto.MedicationTaskDTO::taken).count();
+	public ProgressDTO getTodayProgress() {
+		User user = getCurrentUser();
+		LocalDate today = LocalDate.now();
 
-        List<Wellness> wellnessEntries = wellnessRepository.findByUserAndEntryDate(user, today); 
-        int totalWellnessTasks = 3; 
-        int completedWellnessTasks = wellnessEntries.size(); 
+		List<com.projeto.tcc.dto.MedicationTaskDTO> medicineTasks = medicineService.findTodayTasks();
+		int totalMedicineTasks = medicineTasks.size();
+		int completedMedicineTasks = (int) medicineTasks.stream().filter(com.projeto.tcc.dto.MedicationTaskDTO::taken)
+				.count();
 
-        int totalTasks = totalMedicineTasks + totalWellnessTasks;
-        int completedTasks = completedMedicineTasks + completedWellnessTasks;
+		List<Wellness> wellnessEntries = wellnessRepository.findByUserAndEntryDate(user, today);
+		int totalWellnessTasks = 3;
+		int completedWellnessTasks = wellnessEntries.size();
 
-        if (totalMedicineTasks == 0 && completedMedicineTasks == 0 && wellnessEntries.isEmpty()) {
-            totalTasks = 0;
-            completedTasks = 0;
-        }
-        return new ProgressDTO(completedTasks, totalTasks);
-    }
+		int totalTasks = totalMedicineTasks + totalWellnessTasks;
+		int completedTasks = completedMedicineTasks + completedWellnessTasks;
 
-    public User getCurrentUser() {
-         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o token atual"));
-    }
+		if (totalMedicineTasks == 0 && completedMedicineTasks == 0 && wellnessEntries.isEmpty()) {
+			totalTasks = 0;
+			completedTasks = 0;
+		}
+		return new ProgressDTO(completedTasks, totalTasks);
+	}
+
+	public User getCurrentUser() {
+		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new RuntimeException("Usuário não encontrado para o token atual"));
+	}
 }
-

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 enum PhysicalActivityType { walking, running, cycling, swimming, yoga, other }
 
-// Walking Session Model
 class WalkingSession {
   final String? id;
   final DateTime startTime;
@@ -92,7 +91,6 @@ class WalkingSession {
   }
 }
 
-// Manual Physical Activity Model
 class PhysicalActivity {
   final String? id;
   final PhysicalActivityType type;
@@ -101,7 +99,7 @@ class PhysicalActivity {
   final int durationMinutes;
   final int caloriesBurned;
   final String? notes;
-  final int intensityLevel; // 1-5 scale
+  final int intensityLevel; 
 
   PhysicalActivity({
     this.id,
@@ -143,17 +141,17 @@ class PhysicalActivity {
   Color get intensityColor {
     switch (intensityLevel) {
       case 1:
-        return const Color(0xFF4CAF50); // Light green
+        return const Color(0xFF4CAF50); 
       case 2:
-        return const Color(0xFF8BC34A); // Green
+        return const Color(0xFF8BC34A); 
       case 3:
-        return const Color(0xFFF7B300); // Yellow
+        return const Color(0xFFF7B300); 
       case 4:
-        return const Color(0xFFFF9800); // Orange
+        return const Color(0xFFFF9800); 
       case 5:
-        return const Color(0xFFDC411E); // Red
+        return const Color(0xFFDC411E); 
       default:
-        return const Color(0xFF9E9E9E); // Gray
+        return const Color(0xFF9E9E9E); 
     }
   }
 
@@ -194,7 +192,6 @@ class PhysicalActivity {
   }
 }
 
-// Daily Exercise Goal Model
 class DailyExerciseGoal {
   final int targetSteps;
   final int targetMinutes;
@@ -289,7 +286,6 @@ class DailyExerciseGoal {
   }
 }
 
-// Weekly Exercise Summary
 class WeeklyExerciseSummary {
   final int totalSteps;
   final int totalMinutes;

@@ -22,98 +22,79 @@ import com.projeto.tcc.services.exceptions.ResourceNotFoundException;
 @Transactional
 public class NutritionalDiaryService {
 
-    @Autowired
-    private NutritionalEntryRepository entryRepository;
+	@Autowired
+	private NutritionalEntryRepository entryRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    public User getAuthenticatedUser() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("Usuário não autenticado");
-        }
+	public User getAuthenticatedUser() {
+		var auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null || !auth.isAuthenticated()) {
+			throw new RuntimeException("Usuário não autenticado");
+		}
 
-        String email = auth.getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-    }
+		String email = auth.getName();
+		return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+	}
 
-    @Transactional(readOnly = true)
-    public List<NutritionalEntryDTO> getEntriesByDate(LocalDate date) {
-        User user = getAuthenticatedUser();
-        List<NutritionalEntry> entries = entryRepository.findByUserAndDate(user, date);
-        return entries.stream()
-                      .map(this::convertToDTO)
-                      .collect(Collectors.toList());
-    }
+	@Transactional(readOnly = true)
+	public List<NutritionalEntryDTO> getEntriesByDate(LocalDate date) {
+		User user = getAuthenticatedUser();
+		List<NutritionalEntry> entries = entryRepository.findByUserAndDate(user, date);
+		return entries.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
 
-    public NutritionalEntryDTO createEntry(NutritionalEntryRequest request) {
-        User user = getAuthenticatedUser();
+	public NutritionalEntryDTO createEntry(NutritionalEntryRequest request) {
+		User user = getAuthenticatedUser();
 
-        NutritionalEntry entry = new NutritionalEntry(
-                user,
-                request.getDate(),
-                request.getFoodName(),
-                request.getMealType(),
-                request.getCalories(),
-                request.getProtein(),
-                request.getCarbs(),
-                request.getFat()
-        );
+		NutritionalEntry entry = new NutritionalEntry(user, request.getDate(), request.getFoodName(),
+				request.getMealType(), request.getCalories(), request.getProtein(), request.getCarbs(),
+				request.getFat());
 
-        entry = entryRepository.save(entry);
-        return convertToDTO(entry);
-    }
+		entry = entryRepository.save(entry);
+		return convertToDTO(entry);
+	}
 
-    public NutritionalEntryDTO updateEntry(Long entryId, NutritionalEntryRequest request) {
-        User user = getAuthenticatedUser();
+	public NutritionalEntryDTO updateEntry(Long entryId, NutritionalEntryRequest request) {
+		User user = getAuthenticatedUser();
 
-        NutritionalEntry entry = entryRepository.findById(entryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entry not found"));
+		NutritionalEntry entry = entryRepository.findById(entryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Entry not found"));
 
-        if (!entry.getUser().getId().equals(user.getId())) {
-            throw new ResourceNotFoundException("Entry not found for this user");
-        }
+		if (!entry.getUser().getId().equals(user.getId())) {
+			throw new ResourceNotFoundException("Entry not found for this user");
+		}
 
-        entry.setDate(request.getDate());
-        entry.setFoodName(request.getFoodName());
-        entry.setMealType(request.getMealType());
-        entry.setCalories(request.getCalories());
-        entry.setProtein(request.getProtein());
-        entry.setCarbs(request.getCarbs());
-        entry.setFat(request.getFat());
-        entry.setUpdatedAt(LocalDateTime.now());
+		entry.setDate(request.getDate());
+		entry.setFoodName(request.getFoodName());
+		entry.setMealType(request.getMealType());
+		entry.setCalories(request.getCalories());
+		entry.setProtein(request.getProtein());
+		entry.setCarbs(request.getCarbs());
+		entry.setFat(request.getFat());
+		entry.setUpdatedAt(LocalDateTime.now());
 
-        entry = entryRepository.save(entry);
-        return convertToDTO(entry);
-    }
+		entry = entryRepository.save(entry);
+		return convertToDTO(entry);
+	}
 
-    public void deleteEntry(Long entryId) {
-        User user = getAuthenticatedUser();
+	public void deleteEntry(Long entryId) {
+		User user = getAuthenticatedUser();
 
-        NutritionalEntry entry = entryRepository.findById(entryId)
-                .orElseThrow(() -> new ResourceNotFoundException("Entry not found"));
+		NutritionalEntry entry = entryRepository.findById(entryId)
+				.orElseThrow(() -> new ResourceNotFoundException("Entry not found"));
 
-        if (!entry.getUser().getId().equals(user.getId())) {
-            throw new ResourceNotFoundException("Entry not found for this user");
-        }
+		if (!entry.getUser().getId().equals(user.getId())) {
+			throw new ResourceNotFoundException("Entry not found for this user");
+		}
 
-        entryRepository.delete(entry);
-    }
+		entryRepository.delete(entry);
+	}
 
-    private NutritionalEntryDTO convertToDTO(NutritionalEntry entry) {
-        return new NutritionalEntryDTO(
-                entry.getId(),
-                entry.getDate(),
-                entry.getFoodName(),
-                entry.getMealType(),
-                entry.getCalories(),
-                entry.getProtein(),
-                entry.getCarbs(),
-                entry.getFat(),
-                entry.getCreatedAt(),
-                entry.getUpdatedAt()
-        );
-    }
+	private NutritionalEntryDTO convertToDTO(NutritionalEntry entry) {
+		return new NutritionalEntryDTO(entry.getId(), entry.getDate(), entry.getFoodName(), entry.getMealType(),
+				entry.getCalories(), entry.getProtein(), entry.getCarbs(), entry.getFat(), entry.getCreatedAt(),
+				entry.getUpdatedAt());
+	}
 }

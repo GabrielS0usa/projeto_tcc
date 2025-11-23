@@ -37,7 +37,6 @@ public class UserUpdateRequest {
         this.preferences = preferences;
     }
 
-    // Getters and Setters
     public String getName() { 
         return name; 
     }

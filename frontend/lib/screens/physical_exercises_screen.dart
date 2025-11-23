@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:projeto/screens/walking_tracker_screen.dart';
 import 'package:projeto/screens/exercise_history_screen.dart';
-import '../theme/app_colors.dart';
+import 'package:projeto/screens/walking_tracker_screen.dart';
+
 import '../models/physical_activity.dart';
 import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class PhysicalExercisesScreen extends StatefulWidget {
   const PhysicalExercisesScreen({Key? key}) : super(key: key);
 
   @override
-  State<PhysicalExercisesScreen> createState() => _PhysicalExercisesScreenState();
+  State<PhysicalExercisesScreen> createState() =>
+      _PhysicalExercisesScreenState();
 }
 
 class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
@@ -28,10 +30,10 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
 
   Future<void> _loadDailyGoal() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final response = await _apiService.getTodayExerciseGoal();
-      
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -80,7 +82,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
     if (duration <= 0 || calories <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Por favor, insira valores válidos para duração e calorias'),
+          content:
+              Text('Por favor, insira valores válidos para duração e calorias'),
           backgroundColor: VivaBemColors.vermelhoErro,
         ),
       );
@@ -102,8 +105,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
 
       if (response.statusCode == 201) {
         Navigator.pop(context);
-        await _loadDailyGoal(); // Reload to get updated stats
-        
+        await _loadDailyGoal();
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -116,7 +119,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erro ao registrar atividade: ${response.statusCode}'),
+              content:
+                  Text('Erro ao registrar atividade: ${response.statusCode}'),
               backgroundColor: VivaBemColors.vermelhoErro,
             ),
           );
@@ -146,7 +150,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: VivaBemColors.cinzaEscuro,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Text(
             'Registrar Atividade',
             style: TextStyle(
@@ -183,7 +188,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? PhysicalExercisesPalete.rosaPrincipal.withOpacity(0.3)
+                              ? PhysicalExercisesPalete.rosaPrincipal
+                                  .withOpacity(0.3)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
@@ -266,7 +272,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
                     final level = index + 1;
                     final isSelected = selectedIntensity == level;
                     return GestureDetector(
-                      onTap: () => setDialogState(() => selectedIntensity = level),
+                      onTap: () =>
+                          setDialogState(() => selectedIntensity = level),
                       child: Container(
                         width: 50,
                         height: 50,
@@ -319,7 +326,8 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PhysicalExercisesPalete.rosaPrincipal,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -521,7 +529,7 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
 
   Widget _buildGoalRing() {
     final progress = _dailyGoal.overallProgress / 100;
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -859,7 +867,6 @@ class _PhysicalExercisesScreenState extends State<PhysicalExercisesScreen> {
   }
 }
 
-// Custom painter for the goal ring
 class GoalRingPainter extends CustomPainter {
   final double progress;
   final Color backgroundColor;
@@ -877,7 +884,6 @@ class GoalRingPainter extends CustomPainter {
     final radius = math.min(size.width, size.height) / 2;
     final strokeWidth = 20.0;
 
-    // Background circle
     final backgroundPaint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.stroke
@@ -886,7 +892,6 @@ class GoalRingPainter extends CustomPainter {
 
     canvas.drawCircle(center, radius - strokeWidth / 2, backgroundPaint);
 
-    // Progress arc
     final progressPaint = Paint()
       ..color = progressColor
       ..style = PaintingStyle.stroke

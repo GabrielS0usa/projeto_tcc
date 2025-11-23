@@ -1,5 +1,3 @@
-// lib/models/health_metrics.dart
-
 class HealthMetrics {
   final int completedTasks;
   final int totalTasks;
@@ -13,19 +11,15 @@ class HealthMetrics {
     required this.taskStatus,
   });
 
-  // Calculate progress percentage
   double get progressPercentage {
     if (totalTasks == 0) return 0.0;
     return (completedTasks / totalTasks);
   }
 
-  // Get progress text
   String get progressText => '$completedTasks / $totalTasks';
 
-  // Check if all tasks are completed
   bool get isAllCompleted => completedTasks == totalTasks;
 
-  // Factory constructor for creating mock/default metrics
   factory HealthMetrics.mock() {
     return HealthMetrics(
       completedTasks: 18,
@@ -42,7 +36,6 @@ class HealthMetrics {
     );
   }
 
-  // Factory constructor from JSON (for future API integration)
   factory HealthMetrics.fromJson(Map<String, dynamic> json) {
     return HealthMetrics(
       completedTasks: json['completedTasks'] as int,
@@ -52,7 +45,6 @@ class HealthMetrics {
     );
   }
 
-  // Convert to JSON (for future API integration)
   Map<String, dynamic> toJson() {
     return {
       'completedTasks': completedTasks,
@@ -62,7 +54,6 @@ class HealthMetrics {
     };
   }
 
-  // Copy with method for immutable updates
   HealthMetrics copyWith({
     int? completedTasks,
     int? totalTasks,
@@ -77,7 +68,6 @@ class HealthMetrics {
     );
   }
 
-  // Update task status
   HealthMetrics updateTaskStatus(String taskKey, bool completed) {
     final newTaskStatus = Map<String, bool>.from(taskStatus);
     final wasCompleted = newTaskStatus[taskKey] ?? false;

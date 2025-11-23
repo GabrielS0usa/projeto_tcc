@@ -14,10 +14,10 @@ import com.projeto.tcc.entities.User;
 @Repository
 public interface NutritionalEntryRepository extends JpaRepository<NutritionalEntry, Long> {
 
-    List<NutritionalEntry> findByUserAndDate(User user, LocalDate date);
+	List<NutritionalEntry> findByUserAndDate(User user, LocalDate date);
 
-    List<NutritionalEntry> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
+	List<NutritionalEntry> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
 
-    @Query("SELECT n FROM NutritionalEntry n WHERE n.user = :user AND CAST(n.date AS date) = :date")
-    List<NutritionalEntry> findByUserAndDateEquals(@Param("user") User user, @Param("date") LocalDate date);
+	@Query("SELECT n FROM NutritionalEntry n WHERE n.user = :user AND CAST(n.date AS date) = :date")
+	List<NutritionalEntry> findByUserAndDateEquals(@Param("user") User user, @Param("date") LocalDate date);
 }

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public class UserStatisticsDTO {
     private StatisticsSummaryDTO summary;
-    private ActivityChartsDTO charts; // Enhanced from existing Activity chart logic
+    private ActivityChartsDTO charts;
     private TrendAnalysisDTO trends;
     private LocalDateTime generatedAt;
 
@@ -17,7 +17,6 @@ public class UserStatisticsDTO {
         this.generatedAt = generatedAt;
     }
 
-    // Getters and Setters
     public StatisticsSummaryDTO getSummary() { return summary; }
     public void setSummary(StatisticsSummaryDTO summary) { this.summary = summary; }
     public ActivityChartsDTO getCharts() { return charts; }

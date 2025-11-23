@@ -3,10 +3,10 @@ package com.projeto.tcc.dto;
 import java.util.List;
 
 public class TrendAnalysisDTO {
-    private String period; // daily, weekly, monthly
+    private String period; 
     private List<ActivityTrendDTO> trends;
-    private Double trendSlope; // Positive for improvement, negative for decline
-    private String trendDirection; // improving, declining, stable
+    private Double trendSlope; 
+    private String trendDirection; 
 
     public TrendAnalysisDTO() {}
 
@@ -17,7 +17,6 @@ public class TrendAnalysisDTO {
         this.trendDirection = trendDirection;
     }
 
-    // Getters and Setters
     public String getPeriod() { return period; }
     public void setPeriod(String period) { this.period = period; }
     public List<ActivityTrendDTO> getTrends() { return trends; }

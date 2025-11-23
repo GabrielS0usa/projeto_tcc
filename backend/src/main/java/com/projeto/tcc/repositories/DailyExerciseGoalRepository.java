@@ -11,10 +11,9 @@ import com.projeto.tcc.entities.User;
 
 public interface DailyExerciseGoalRepository extends JpaRepository<DailyExerciseGoal, Long> {
 
-    Optional<DailyExerciseGoal> findByUserAndDate(User user, LocalDate date);
-    
-    List<DailyExerciseGoal> findByUserAndDateBetweenOrderByDateDesc(
-        User user, LocalDate startDate, LocalDate endDate);
-    
-    List<DailyExerciseGoal> findByUserOrderByDateDesc(User user);
+	Optional<DailyExerciseGoal> findByUserAndDate(User user, LocalDate date);
+
+	List<DailyExerciseGoal> findByUserAndDateBetweenOrderByDateDesc(User user, LocalDate startDate, LocalDate endDate);
+
+	List<DailyExerciseGoal> findByUserOrderByDateDesc(User user);
 }

@@ -38,32 +38,22 @@ class UserProfile {
       nameCaregiver: json['nameCaregiver'],
       emailCaregiver: json['emailCaregiver'],
       avatarUrl: json['avatarUrl'],
-      createdAt:
-          json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
       reportingConsent: json['reportingConsent'] ?? false,
     );
   }
 
-  /// Função auxiliar para garantir que o ID sempre vire int? corretamente.
-  /// Prioridade: 
-  /// 1. Se o JSON tem ID válido, usa ele
-  /// 2. Se o JSON não tem ID, usa o fallbackId (ID do storage)
   static int? _parseId(dynamic id, int? fallbackId) {
-    // Se o JSON não tem ID, usa o fallback (ID salvo localmente)
+  
     if (id == null) return fallbackId;
-
-    // Se o ID do JSON é int, usa ele
     if (id is int) return id;
-
-    // Se o ID do JSON é String, tenta converter
     if (id is String) {
       final parsed = int.tryParse(id);
-      // Se conseguiu converter, usa o ID do JSON
-      // Se não conseguiu, usa o fallback
       return parsed ?? fallbackId;
     }
 
-    // Para qualquer outro tipo inesperado, usa o fallback
     return fallbackId;
   }
 
@@ -95,7 +85,7 @@ class UserProfile {
     bool? reportingConsent,
   }) {
     return UserProfile(
-      id: id ?? this.id, 
+      id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,

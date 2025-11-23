@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../theme/app_colors.dart';
-import '../services/api_service.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class MealRecord {
   final int id;
@@ -39,8 +41,22 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
 
   final Map<String, List<String>> _mealOptions = {
     'Café da Manhã': ['Pão', 'Frutas', 'Ovos', 'Café', 'Leite', 'Iogurte'],
-    'Almoço': ['Arroz', 'Feijão', 'Salada', 'Carne', 'Frango', 'Peixe', 'Legumes'],
-    'Jantar': ['Sopa', 'Salada', 'Frango Grelhado', 'Omelete', 'Legumes Cozidos'],
+    'Almoço': [
+      'Arroz',
+      'Feijão',
+      'Salada',
+      'Carne',
+      'Frango',
+      'Peixe',
+      'Legumes'
+    ],
+    'Jantar': [
+      'Sopa',
+      'Salada',
+      'Frango Grelhado',
+      'Omelete',
+      'Legumes Cozidos'
+    ],
     'Lanches': ['Fruta', 'Castanhas', 'Biscoito Integral', 'Vitamina'],
   };
 
@@ -154,7 +170,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
     }
   }
 
-  Future<void> _showMealOptionsModal(String title, Function(MealRecord) onSave) async {
+  Future<void> _showMealOptionsModal(
+      String title, Function(MealRecord) onSave) async {
     List<String> availableOptions = _mealOptions[title] ?? [];
     List<String> selectedItems = [];
 
@@ -207,61 +224,70 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: selectedItems.isEmpty ? null : () async {
-                        try {
-                          final Map<String, dynamic> payload = {
-                            'date': _getFormattedDate(DateTime.now()),
-                            'foodName': selectedItems.join(', '),
-                            'mealType': title,
-                            'calories': 0.0,
-                            'protein': 0.0,
-                            'carbs': 0.0,
-                            'fat': 0.0,
-                          };
+                      onPressed: selectedItems.isEmpty
+                          ? null
+                          : () async {
+                              try {
+                                final Map<String, dynamic> payload = {
+                                  'date': _getFormattedDate(DateTime.now()),
+                                  'foodName': selectedItems.join(', '),
+                                  'mealType': title,
+                                  'calories': 0.0,
+                                  'protein': 0.0,
+                                  'carbs': 0.0,
+                                  'fat': 0.0,
+                                };
 
-                          final response = await _apiService.createDiaryEntry(payload);
+                                final response =
+                                    await _apiService.createDiaryEntry(payload);
 
-                          // ✅ CORRIGIDO: Aceita 200 e 201
-                          if (response.statusCode == 200 || response.statusCode == 201) {
-                            final newEntryJson = jsonDecode(utf8.decode(response.bodyBytes));
+                                if (response.statusCode == 200 ||
+                                    response.statusCode == 201) {
+                                  final newEntryJson = jsonDecode(
+                                      utf8.decode(response.bodyBytes));
 
-                            onSave(MealRecord(
-                              id: newEntryJson['id'],
-                              timestamp: DateTime.now(),
-                              items: selectedItems,
-                            ));
-                            Navigator.pop(context);
+                                  onSave(MealRecord(
+                                    id: newEntryJson['id'],
+                                    timestamp: DateTime.now(),
+                                    items: selectedItems,
+                                  ));
+                                  Navigator.pop(context);
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Refeição registrada com sucesso! ✅'),
-                                backgroundColor: VivaBemColors.verdeConfirmacao,
-                              ),
-                            );
-                          } else {
-                            // ✅ CORRIGIDO: Tenta decodificar erro JSON
-                            String errorMessage = 'Erro: ${response.statusCode}';
-                            try {
-                              final errorJson = jsonDecode(utf8.decode(response.bodyBytes));
-                              errorMessage = errorJson['message'] ?? errorMessage;
-                            } catch (_) {}
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Refeição registrada com sucesso! ✅'),
+                                      backgroundColor:
+                                          VivaBemColors.verdeConfirmacao,
+                                    ),
+                                  );
+                                } else {
+                                  String errorMessage =
+                                      'Erro: ${response.statusCode}';
+                                  try {
+                                    final errorJson = jsonDecode(
+                                        utf8.decode(response.bodyBytes));
+                                    errorMessage =
+                                        errorJson['message'] ?? errorMessage;
+                                  } catch (_) {}
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(errorMessage),
-                                backgroundColor: VivaBemColors.vermelhoErro,
-                              ),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Erro de conexão: $e'),
-                              backgroundColor: VivaBemColors.vermelhoErro,
-                            ),
-                          );
-                        }
-                      },
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(errorMessage),
+                                      backgroundColor:
+                                          VivaBemColors.vermelhoErro,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erro de conexão: $e'),
+                                    backgroundColor: VivaBemColors.vermelhoErro,
+                                  ),
+                                );
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: NutritionPalete.laranjaPrincipal,
                         disabledBackgroundColor: Colors.grey,
@@ -291,7 +317,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: VivaBemColors.cinzaEscuro,
-          title: const Text('Adicionar Item', style: TextStyle(color: Colors.white)),
+          title: const Text('Adicionar Item',
+              style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: customFoodController,
             autofocus: true,
@@ -304,7 +331,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context, customFoodController.text),
+              onPressed: () =>
+                  Navigator.pop(context, customFoodController.text),
               child: const Text('Adicionar'),
             ),
           ],
@@ -313,13 +341,13 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
     );
   }
 
-  // ✅ NOVO: Função para deletar refeição
   Future<void> _deleteMeal(MealRecord record, String mealType) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: VivaBemColors.cinzaEscuro,
-        title: const Text('Confirmar exclusão', style: TextStyle(color: Colors.white)),
+        title: const Text('Confirmar exclusão',
+            style: TextStyle(color: Colors.white)),
         content: Text(
           'Deseja excluir o registro de $mealType?',
           style: const TextStyle(color: Colors.white),
@@ -331,7 +359,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: VivaBemColors.vermelhoErro),
+            style: ElevatedButton.styleFrom(
+                backgroundColor: VivaBemColors.vermelhoErro),
             child: const Text('Excluir'),
           ),
         ],
@@ -405,13 +434,17 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                       children: [
                         Text(
                           'Erro ao carregar diário',
-                          style: const TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
                         Text(
                           _error!,
-                          style: const TextStyle(color: Colors.red, fontSize: 14),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 14),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 16),
@@ -532,7 +565,9 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
                 return GestureDetector(
                   onTap: () => _logWater(index),
                   child: Icon(
-                    isFilled ? FontAwesomeIcons.glassWater : FontAwesomeIcons.circle,
+                    isFilled
+                        ? FontAwesomeIcons.glassWater
+                        : FontAwesomeIcons.circle,
                     color: isFilled
                         ? NutritionPalete.azulHidratacao
                         : VivaBemColors.branco.withOpacity(0.3),
@@ -620,13 +655,16 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
       return ListTile(
         onTap: onRegister,
         contentPadding: EdgeInsets.zero,
-        leading: Icon(icon, color: VivaBemColors.branco.withOpacity(0.7), size: 30),
-        title: Text(title, style: const TextStyle(color: Colors.white, fontSize: 18)),
+        leading:
+            Icon(icon, color: VivaBemColors.branco.withOpacity(0.7), size: 30),
+        title: Text(title,
+            style: const TextStyle(color: Colors.white, fontSize: 18)),
         subtitle: Text(
           "Toque para registrar",
           style: TextStyle(color: Colors.white.withOpacity(0.5)),
         ),
-        trailing: Icon(Icons.add_circle, color: NutritionPalete.amareloDourado, size: 36),
+        trailing: Icon(Icons.add_circle,
+            color: NutritionPalete.amareloDourado, size: 36),
       );
     } else {
       return Column(
@@ -634,7 +672,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
         children: [
           ListTile(
             contentPadding: EdgeInsets.zero,
-            leading: Icon(icon, color: VivaBemColors.verdeConfirmacao, size: 30),
+            leading:
+                Icon(icon, color: VivaBemColors.verdeConfirmacao, size: 30),
             title: Text(
               title,
               style: const TextStyle(
@@ -647,7 +686,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
               'Registrado às ${DateFormat('HH:mm').format(record.timestamp)}',
               style: const TextStyle(color: VivaBemColors.verdeConfirmacao),
             ),
-            trailing: const Icon(Icons.check_circle, color: VivaBemColors.verdeConfirmacao, size: 36),
+            trailing: const Icon(Icons.check_circle,
+                color: VivaBemColors.verdeConfirmacao, size: 36),
             onLongPress: () => _deleteMeal(record, title),
           ),
           Padding(
@@ -658,7 +698,8 @@ class _NutricaoDiarioScreenState extends State<NutricaoDiarioScreen> {
               children: record.items
                   .map((item) => Chip(
                         label: Text(item),
-                        backgroundColor: NutritionPalete.amareloDourado.withOpacity(0.3),
+                        backgroundColor:
+                            NutritionPalete.amareloDourado.withOpacity(0.3),
                       ))
                   .toList(),
             ),

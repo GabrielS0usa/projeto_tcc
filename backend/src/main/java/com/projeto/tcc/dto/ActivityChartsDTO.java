@@ -3,10 +3,10 @@ package com.projeto.tcc.dto;
 import java.util.Map;
 
 public class ActivityChartsDTO {
-    private Map<String, Object> weeklyProgress;       // Existing main screen logic
-    private Map<String, Object> categoryBreakdown;    // Enhanced from Activity
-    private Map<String, Object> performanceMetrics;   // New comprehensive metrics
-    private Map<String, Object> goalTracking;         // Enhanced tracking
+    private Map<String, Object> weeklyProgress;       
+    private Map<String, Object> categoryBreakdown;    
+    private Map<String, Object> performanceMetrics;   
+    private Map<String, Object> goalTracking;         
 
     public ActivityChartsDTO() {}
 
@@ -18,7 +18,6 @@ public class ActivityChartsDTO {
         this.goalTracking = goalTracking;
     }
 
-    // Getters and Setters
     public Map<String, Object> getWeeklyProgress() { return weeklyProgress; }
     public void setWeeklyProgress(Map<String, Object> weeklyProgress) { this.weeklyProgress = weeklyProgress; }
     public Map<String, Object> getCategoryBreakdown() { return categoryBreakdown; }

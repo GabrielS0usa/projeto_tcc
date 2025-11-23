@@ -1,11 +1,11 @@
-// lib/screens/stats_screen.dart
-
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../theme/app_colors.dart';
-import '../services/api_service.dart';
+
 import '../models/statistics.dart';
+import '../services/api_service.dart';
+import '../theme/app_colors.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({Key? key}) : super(key: key);
@@ -393,7 +393,8 @@ class _StatsScreenState extends State<StatsScreen> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: VivaBemColors.amareloDourado.withOpacity(0.3),
+                            color:
+                                VivaBemColors.amareloDourado.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Center(
@@ -409,7 +410,7 @@ class _StatsScreenState extends State<StatsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        trend.date.toString().split(' ')[0], // Show date
+                        trend.date.toString().split(' ')[0], 
                         style: TextStyle(
                           color: VivaBemColors.branco.withOpacity(0.7),
                           fontSize: 12,
@@ -445,7 +446,6 @@ class _StatsScreenState extends State<StatsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          // Placeholder for completion rates - backend doesn't provide this data yet
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Row(
