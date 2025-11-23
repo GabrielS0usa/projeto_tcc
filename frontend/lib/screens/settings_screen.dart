@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final ApiService _apiService = ApiService();
   final _storage = const FlutterSecureStorage();
   bool _isLoading = true;
+  bool _isSendingEmail = false;
   String? _error;
   UserProfile? _userProfile;
 
@@ -67,6 +68,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _error = 'Erro de conexão: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _sendDailyReport() async {
+    if (_userProfile == null) {
+      _showError('Perfil de usuário não carregado');
+      return;
+    }
+
+    // Verifica se o consentimento está ativo
+    if (!(_userProfile?.reportingConsent ?? false)) {
+      _showWarningDialog(
+        'Relatórios Desativados',
+        'Para enviar relatórios, você precisa ativar a opção "Relatórios de Progresso" nas configurações.',
+      );
+      return;
+    }
+
+    // Verifica se há email de cuidador cadastrado
+    if (_userProfile?.emailCaregiver == null || 
+        _userProfile!.emailCaregiver!.isEmpty) {
+      _showWarningDialog(
+        'Email Não Cadastrado',
+        'Você precisa cadastrar um email de cuidador no seu perfil para receber os relatórios.',
+      );
+      return;
+    }
+
+    // Confirma o envio
+    final confirmed = await _showConfirmDialog(
+      'Enviar Relatório Diário',
+      'Deseja enviar o relatório de hoje para ${_userProfile!.emailCaregiver}?',
+    );
+
+    if (confirmed != true) return;
+
+    setState(() {
+      _isSendingEmail = true;
+    });
+
+    try {
+      final userIdString = await _storage.read(key: 'userId');
+      if (userIdString == null) {
+        throw Exception('Usuário não encontrado');
+      }
+
+      final userId = int.tryParse(userIdString);
+      if (userId == null) {
+        throw Exception('ID do usuário inválido');
+      }
+
+      // Chama o endpoint para gerar e enviar o relatório
+      final response = await _apiService.sendDailyReport(userId: userId);
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        _showSuccessDialog(
+          'Relatório Enviado!',
+          'O relatório diário foi enviado com sucesso para ${_userProfile!.emailCaregiver}',
+        );
+      } else {
+        final errorMessage = response.body.isNotEmpty 
+            ? jsonDecode(response.body)['message'] ?? 'Erro desconhecido'
+            : 'Falha ao enviar relatório';
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showError('Erro ao enviar relatório: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingEmail = false;
+        });
+      }
     }
   }
 
@@ -149,6 +226,199 @@ class _SettingsScreenState extends State<SettingsScreen> {
       SnackBar(
         content: Text(message),
         backgroundColor: VivaBemColors.vermelhoErro,
+      ),
+    );
+  }
+
+  Future<void> _showSuccessDialog(String title, String message) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: VivaBemColors.azulMarinho,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: VivaBemColors.verdeConfirmacao.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.circleCheck,
+                color: VivaBemColors.verdeConfirmacao,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: VivaBemColors.branco,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: VivaBemColors.branco.withOpacity(0.8),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'OK',
+              style: TextStyle(
+                color: VivaBemColors.amareloDourado,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showWarningDialog(String title, String message) async {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: VivaBemColors.azulMarinho,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: VivaBemColors.amareloDourado.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.triangleExclamation,
+                color: VivaBemColors.amareloDourado,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: VivaBemColors.branco,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: VivaBemColors.branco.withOpacity(0.8),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Entendi',
+              style: TextStyle(
+                color: VivaBemColors.amareloDourado,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _showConfirmDialog(String title, String message) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: VivaBemColors.azulMarinho,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: VivaBemColors.amareloDourado.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: FaIcon(
+                FontAwesomeIcons.envelope,
+                color: VivaBemColors.amareloDourado,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: VivaBemColors.branco,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          message,
+          style: TextStyle(
+            color: VivaBemColors.branco.withOpacity(0.8),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: VivaBemColors.branco.withOpacity(0.6),
+                fontSize: 16,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: VivaBemColors.amareloDourado,
+              foregroundColor: VivaBemColors.azulMarinho,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Enviar',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -298,15 +568,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         const SizedBox(height: 20),
         _buildSettingsSection(
-          title: 'Notificações',
+          title: 'Relatórios',
           items: [
-            _buildSettingsItem(
-              icon: FontAwesomeIcons.bell,
-              title: 'Lembretes',
-              subtitle: 'Configurar notificações',
-              onTap: () {
-                _showError('Configurações de notificações em desenvolvimento');
-              },
+            _buildSettingsItemWithLoading(
+              icon: FontAwesomeIcons.paperPlane,
+              title: 'Enviar Relatório Diário',
+              subtitle: 'Enviar relatório de hoje por email',
+              onTap: _sendDailyReport,
+              isLoading: _isSendingEmail,
             ),
           ],
         ),
@@ -319,7 +588,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               title: 'Informações do App',
               subtitle: 'Versão 1.0.0',
               onTap: () {
-                // TODO: Show app info dialog
                 _showError('Informações do app em desenvolvimento');
               },
             ),
@@ -423,6 +691,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Icons.chevron_right,
               color: color.withOpacity(0.4),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsItemWithLoading({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isLoading,
+  }) {
+    return InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: VivaBemColors.amareloDourado.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: FaIcon(
+                icon,
+                size: 20,
+                color: VivaBemColors.amareloDourado,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: VivaBemColors.branco,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: VivaBemColors.branco.withOpacity(0.6),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isLoading)
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    VivaBemColors.amareloDourado,
+                  ),
+                ),
+              )
+            else
+              Icon(
+                Icons.chevron_right,
+                color: VivaBemColors.branco.withOpacity(0.4),
+              ),
           ],
         ),
       ),

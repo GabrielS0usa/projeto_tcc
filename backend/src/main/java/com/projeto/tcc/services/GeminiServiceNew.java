@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import com.projeto.tcc.dto.DailyDataBundle;
 import com.projeto.tcc.dto.GeminiReportResponse;
 import com.projeto.tcc.entities.*;
 import com.projeto.tcc.repositories.UserRepository;
-import com.projeto.tcc.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class GeminiServiceNew {
@@ -64,13 +62,332 @@ public class GeminiServiceNew {
         }
 
         DailyDataBundle dailyData = dailyDataAggregator.aggregateDailyData(user.getId(), date);
-        String prompt = createComprehensivePrompt(dailyData);
+        String prompt = createStructuredPromptForJson(dailyData, date);
         String rawResponse = sendToGeminiAPI(prompt);
 
         return parseGeminiResponse(rawResponse);
     }
 
-    private String createComprehensivePrompt(DailyDataBundle data) {
+    // Método atualizado para retornar o texto do email diretamente
+    public String generateDailyEmailReport(String userId, LocalDate date) {
+        logger.info("Generating daily email report for user: {} on date: {}", userId, date);
+        
+        User user = getCurrentUser();
+
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("SUA_KEY_AQUI")) {
+            logger.error("Gemini API Key is not configured");
+            throw new RuntimeException("Gemini API Key is not configured");
+        }
+
+        DailyDataBundle dailyData = dailyDataAggregator.aggregateDailyData(user.getId(), date);
+        String prompt = createComprehensivePrompt(dailyData, date);
+        String emailContent = sendToGeminiAPI(prompt);
+
+        // Remove possíveis marcações de código que o modelo possa adicionar
+        emailContent = emailContent
+            .replaceAll("```[a-z]*\\s*", "")
+            .replaceAll("```\\s*", "")
+            .trim();
+
+        logger.info("Email report generated successfully for user: {}", userId);
+        
+        return emailContent;
+    }
+
+    private String createComprehensivePrompt(DailyDataBundle data, LocalDate reportDate) {
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("Você é um assistente de saúde e bem-estar pessoal especializado em análise holística de dados de saúde. ")
+              .append("Sua tarefa é gerar um relatório diário completo e personalizado que será enviado por email para o usuário.\n\n");
+
+        // Contexto do usuário
+        prompt.append("=== PERFIL DO USUÁRIO ===\n")
+              .append("Nome: ").append(data.getUser().getName()).append("\n")
+              .append("Idade: ").append(calculateAge(data.getUser().getBirthDate())).append(" anos\n")
+              .append("Data do Relatório: ").append(reportDate.toString()).append("\n\n");
+
+        // Seção 1: Bem-estar Mental e Emocional
+        prompt.append("=== BEM-ESTAR MENTAL E EMOCIONAL ===\n");
+        if (data.getWellness() != null) {
+            prompt.append("Estado de Humor: ").append(data.getWellness().getMood()).append("\n");
+            if (data.getWellness().getPeriod() != null) {
+                prompt.append("Ciclo Menstrual: ").append(data.getWellness().getPeriod()).append("\n");
+            }
+            if (data.getWellness().getNote() != null && !data.getWellness().getNote().isEmpty()) {
+                prompt.append("Observações Pessoais: ").append(data.getWellness().getNote()).append("\n");
+            }
+        } else {
+            prompt.append("Nenhum registro de bem-estar emocional hoje.\n");
+        }
+        prompt.append("\n");
+
+        // Seção 2: Nutrição
+        prompt.append("=== ALIMENTAÇÃO E NUTRIÇÃO ===\n");
+        if (data.getNutritionalEntries() != null && !data.getNutritionalEntries().isEmpty()) {
+            int totalCalories = 0;
+            double totalProtein = 0, totalCarbs = 0, totalFat = 0;
+            
+            prompt.append("Refeições registradas:\n");
+            for (NutritionalEntry entry : data.getNutritionalEntries()) {
+                prompt.append("  • ").append(entry.getFoodName())
+                      .append(" - ").append(entry.getCalories()).append(" kcal")
+                      .append(" (P: ").append(entry.getProtein()).append("g")
+                      .append(", C: ").append(entry.getCarbs()).append("g")
+                      .append(", G: ").append(entry.getFat()).append("g)\n");
+                
+                totalCalories += entry.getCalories();
+                totalProtein += entry.getProtein();
+                totalCarbs += entry.getCarbs();
+                totalFat += entry.getFat();
+            }
+            prompt.append("\nTotal Diário:\n")
+                  .append("  • Calorias: ").append(totalCalories).append(" kcal\n")
+                  .append("  • Proteínas: ").append(String.format("%.1f", totalProtein)).append("g\n")
+                  .append("  • Carboidratos: ").append(String.format("%.1f", totalCarbs)).append("g\n")
+                  .append("  • Gorduras: ").append(String.format("%.1f", totalFat)).append("g\n");
+        } else {
+            prompt.append("Nenhuma refeição registrada hoje.\n");
+        }
+        prompt.append("\n");
+
+        // Seção 3: Atividades Físicas
+        prompt.append("=== ATIVIDADES FÍSICAS ===\n");
+        boolean hasActivity = false;
+        
+        // Atividades gerais
+        if (data.getPhysicalActivities() != null && !data.getPhysicalActivities().isEmpty()) {
+            hasActivity = true;
+            int totalMinutes = 0;
+            int totalCaloriesBurned = 0;
+            
+            prompt.append("Exercícios realizados:\n");
+            for (PhysicalActivityEntity activity : data.getPhysicalActivities()) {
+                prompt.append("  • ").append(activity.getActivityType())
+                      .append(" - ").append(activity.getDurationMinutes()).append(" minutos");
+                if (activity.getCaloriesBurned() != null) {
+                    prompt.append(" (").append(activity.getCaloriesBurned()).append(" kcal queimadas)");
+                    totalCaloriesBurned += activity.getCaloriesBurned();
+                }
+                prompt.append("\n");
+                totalMinutes += activity.getDurationMinutes();
+            }
+            prompt.append("Total de exercícios: ").append(totalMinutes).append(" minutos, ")
+                  .append(totalCaloriesBurned).append(" kcal queimadas\n\n");
+        }
+        
+        // Caminhadas
+        if (data.getWalkingSessions() != null && !data.getWalkingSessions().isEmpty()) {
+            hasActivity = true;
+            int totalSteps = 0;
+            double totalDistance = 0;
+            int totalWalkMinutes = 0;
+            
+            prompt.append("Caminhadas registradas:\n");
+            for (WalkingSession walk : data.getWalkingSessions()) {
+                prompt.append("  • ").append(walk.getSteps() != null ? walk.getSteps() : 0).append(" passos")
+                      .append(" - ").append(walk.getDistanceKm() != null ? String.format("%.2f", walk.getDistanceKm()) : "0").append(" km")
+                      .append(" - ").append(walk.getDurationMinutes() != null ? walk.getDurationMinutes() : 0).append(" minutos\n");
+                
+                totalSteps += (walk.getSteps() != null ? walk.getSteps() : 0);
+                totalDistance += (walk.getDistanceKm() != null ? walk.getDistanceKm() : 0);
+                totalWalkMinutes += (walk.getDurationMinutes() != null ? walk.getDurationMinutes() : 0);
+            }
+            prompt.append("Total de caminhadas: ").append(totalSteps).append(" passos, ")
+                  .append(String.format("%.2f", totalDistance)).append(" km, ")
+                  .append(totalWalkMinutes).append(" minutos\n\n");
+        }
+        
+        // Metas de exercício
+        if (data.getExerciseGoals() != null) {
+            prompt.append("Progresso das Metas:\n");
+            
+            if (data.getExerciseGoals().getTargetSteps() != null && data.getExerciseGoals().getTargetSteps() > 0) {
+                int currentSteps = data.getExerciseGoals().getCurrentSteps() != null ? data.getExerciseGoals().getCurrentSteps() : 0;
+                int targetSteps = data.getExerciseGoals().getTargetSteps();
+                int percentSteps = (int) ((currentSteps * 100.0) / targetSteps);
+                prompt.append("  • Passos: ").append(currentSteps).append("/").append(targetSteps)
+                      .append(" (").append(percentSteps).append("%)\n");
+            }
+            
+            if (data.getExerciseGoals().getTargetMinutes() != null && data.getExerciseGoals().getTargetMinutes() > 0) {
+                int currentMinutes = data.getExerciseGoals().getCurrentMinutes() != null ? data.getExerciseGoals().getCurrentMinutes() : 0;
+                int targetMinutes = data.getExerciseGoals().getTargetMinutes();
+                int percentMinutes = (int) ((currentMinutes * 100.0) / targetMinutes);
+                prompt.append("  • Minutos de Atividade: ").append(currentMinutes).append("/").append(targetMinutes)
+                      .append(" (").append(percentMinutes).append("%)\n");
+            }
+            
+            if (data.getExerciseGoals().getTargetCalories() != null && data.getExerciseGoals().getTargetCalories() > 0) {
+                int currentCalories = data.getExerciseGoals().getCurrentCalories() != null ? data.getExerciseGoals().getCurrentCalories() : 0;
+                int targetCalories = data.getExerciseGoals().getTargetCalories();
+                int percentCalories = (int) ((currentCalories * 100.0) / targetCalories);
+                prompt.append("  • Calorias Queimadas: ").append(currentCalories).append("/").append(targetCalories)
+                      .append(" (").append(percentCalories).append("%)\n");
+            }
+        }
+        
+        if (!hasActivity && (data.getExerciseGoals() == null || data.getExerciseGoals().getTargetSteps() == null)) {
+            prompt.append("Nenhuma atividade física registrada hoje.\n");
+        }
+        prompt.append("\n");
+
+        // Seção 4: Medicamentos
+        prompt.append("=== GESTÃO DE MEDICAMENTOS ===\n");
+        if (data.getMedicines() != null && !data.getMedicines().isEmpty()) {
+            prompt.append("Medicamentos prescritos:\n");
+            data.getMedicines().forEach(medicine -> {
+                prompt.append("  • ").append(medicine.getName())
+                      .append(" - ").append(medicine.getDose()).append("\n");
+            });
+            
+            if (data.getMedicationTasks() != null && !data.getMedicationTasks().isEmpty()) {
+                int taken = 0;
+                int total = data.getMedicationTasks().size();
+                
+                prompt.append("\nAderência do dia:\n");
+                for (MedicationTask task : data.getMedicationTasks()) {
+                    String status = task.isTaken() ? "✓ Tomado" : "✗ Não tomado";
+                    prompt.append("  • ").append(task.getMedicine().getName())
+                          .append(" às ").append(task.getScheduledTime())
+                          .append(" - ").append(status).append("\n");
+                    if (task.isTaken()) taken++;
+                }
+                
+                int adherencePercent = (int) ((taken * 100.0) / total);
+                prompt.append("\nTaxa de Adesão: ").append(taken).append("/").append(total)
+                      .append(" (").append(adherencePercent).append("%)\n");
+            }
+        } else {
+            prompt.append("Nenhum medicamento prescrito.\n");
+        }
+        prompt.append("\n");
+
+        // Seção 5: Consultas Médicas
+        prompt.append("=== CONSULTAS E COMPROMISSOS MÉDICOS ===\n");
+        if (data.getAppointments() != null && !data.getAppointments().isEmpty()) {
+            data.getAppointments().forEach(appointment -> {
+                String status = appointment.isCompleted() ? "Realizada" : "Agendada";
+                prompt.append("  • ").append(appointment.getTitle())
+                      .append(" (").append(appointment.getType()).append(")\n")
+                      .append("    Horário: ").append(appointment.getDate()).append("\n")
+                      .append("    Local: ").append(appointment.getLocation()).append("\n")
+                      .append("    Status: ").append(status).append("\n");
+            });
+        } else {
+            prompt.append("Nenhuma consulta agendada para hoje.\n");
+        }
+        prompt.append("\n");
+
+        // Seção 6: Atividades Cognitivas e Lazer
+        prompt.append("=== ATIVIDADES COGNITIVAS E LAZER ===\n");
+        boolean hasCognitiveActivity = false;
+        
+        // Leitura
+        if (data.getReadingActivities() != null && !data.getReadingActivities().isEmpty()) {
+            hasCognitiveActivity = true;
+            prompt.append("📚 Leitura:\n");
+            data.getReadingActivities().forEach(reading -> {
+                int progress = reading.getTotalPages() > 0 ? 
+                    (int) ((reading.getCurrentPage() * 100.0) / reading.getTotalPages()) : 0;
+                String status = reading.getIsCompleted() ? "Concluído" : progress + "% completo";
+                prompt.append("  • ").append(reading.getBookTitle())
+                      .append(" - Página ").append(reading.getCurrentPage())
+                      .append(" de ").append(reading.getTotalPages())
+                      .append(" (").append(status).append(")\n");
+            });
+        }
+        
+        // Palavras cruzadas
+        if (data.getCrosswordActivities() != null && !data.getCrosswordActivities().isEmpty()) {
+            hasCognitiveActivity = true;
+            prompt.append("\n🧩 Palavras Cruzadas:\n");
+            data.getCrosswordActivities().forEach(crossword -> {
+                String status = crossword.getIsCompleted() ? "Completado" : "Em progresso";
+                prompt.append("  • ").append(crossword.getPuzzleName())
+                      .append(" (").append(crossword.getDifficulty()).append(")")
+                      .append(" - ").append(crossword.getTimeSpentMinutes()).append(" minutos")
+                      .append(" - ").append(status).append("\n");
+            });
+        }
+        
+        // Filmes
+        if (data.getMovieActivities() != null && !data.getMovieActivities().isEmpty()) {
+            hasCognitiveActivity = true;
+            prompt.append("\n🎬 Filmes:\n");
+            data.getMovieActivities().forEach(movie -> {
+                String status = movie.getIsWatched() ? "Assistido" : "Na lista";
+                prompt.append("  • ").append(movie.getMovieTitle());
+                if (movie.getGenre() != null) {
+                    prompt.append(" (").append(movie.getGenre()).append(")");
+                }
+                if (movie.getIsWatched() && movie.getRating() != null) {
+                    prompt.append(" - Avaliação: ").append(movie.getRating()).append("/5");
+                }
+                prompt.append(" - ").append(status).append("\n");
+            });
+        }
+        
+        if (!hasCognitiveActivity) {
+            prompt.append("Nenhuma atividade cognitiva ou de lazer registrada hoje.\n");
+        }
+        prompt.append("\n");
+
+        // Instruções para a IA
+        prompt.append("=== INSTRUÇÕES PARA ANÁLISE ===\n")
+              .append("Com base em TODOS os dados acima, gere um relatório de bem-estar completo e personalizado em formato de EMAIL.\n\n")
+              .append("O relatório deve incluir:\n\n")
+              .append("1. SAUDAÇÃO PERSONALIZADA\n")
+              .append("   - Cumprimente o usuário pelo nome de forma calorosa\n\n")
+              .append("2. RESUMO EXECUTIVO DO DIA\n")
+              .append("   - Uma visão geral dos principais destaques e conquistas do dia\n")
+              .append("   - Identificar padrões positivos e áreas de atenção\n\n")
+              .append("3. ANÁLISE DETALHADA POR ÁREA\n")
+              .append("   a) Saúde Física e Exercícios\n")
+              .append("      - Avaliar o nível de atividade física\n")
+              .append("      - Progresso em relação às metas\n")
+              .append("      - Calorias queimadas vs. consumidas\n\n")
+              .append("   b) Nutrição e Alimentação\n")
+              .append("      - Balanço calórico e distribuição de macronutrientes\n")
+              .append("      - Qualidade das escolhas alimentares\n")
+              .append("      - Sugestões para melhorar a nutrição\n\n")
+              .append("   c) Bem-estar Mental e Emocional\n")
+              .append("      - Análise do estado de humor\n")
+              .append("      - Correlação entre atividades e bem-estar emocional\n\n")
+              .append("   d) Adesão ao Tratamento Médico\n")
+              .append("      - Taxa de adesão aos medicamentos\n")
+              .append("      - Importância da consistência\n")
+              .append("      - Lembretes sobre consultas agendadas\n\n")
+              .append("   e) Engajamento Cognitivo e Social\n")
+              .append("      - Atividades de estimulação mental realizadas\n")
+              .append("      - Importância do equilíbrio entre atividades\n\n")
+              .append("4. RECOMENDAÇÕES PERSONALIZADAS\n")
+              .append("   - 3 a 5 recomendações específicas e acionáveis\n")
+              .append("   - Baseadas nos dados do dia e nas áreas que precisam de atenção\n")
+              .append("   - Priorize recomendações realistas e graduais\n\n")
+              .append("5. MENSAGEM MOTIVACIONAL\n")
+              .append("   - Reconheça os esforços e conquistas do usuário\n")
+              .append("   - Incentive a continuidade dos bons hábitos\n")
+              .append("   - Termine com uma nota positiva e encorajadora\n\n")
+              .append("6. ASSINATURA\n")
+              .append("   - Despedida cordial\n")
+              .append("   - Lembrete sobre quando será o próximo relatório\n\n")
+              .append("FORMATAÇÃO IMPORTANTE:\n")
+              .append("- Use uma linguagem empática, acolhedora e profissional\n")
+              .append("- Todo o texto deve estar em português brasileiro\n")
+              .append("- Use emojis moderadamente para tornar o email mais amigável\n")
+              .append("- Estruture o texto com parágrafos claros e espaçamento adequado\n")
+              .append("- Use marcadores (•) ou numeração quando apropriado\n")
+              .append("- Seja específico citando números e dados reais do usuário\n")
+              .append("- Mantenha um tom positivo mesmo ao abordar áreas de melhoria\n")
+              .append("- O email deve ser completo mas conciso (não muito longo)\n\n")
+              .append("RETORNE APENAS O TEXTO DO EMAIL, SEM JSON, SEM MARKDOWN, SEM CÓDIGO.\n")
+              .append("O texto deve estar pronto para ser enviado diretamente por email.");
+
+        return prompt.toString();
+    }
+
+    // Método alternativo para relatório estruturado JSON (mantido para compatibilidade)
+    private String createStructuredPromptForJson(DailyDataBundle data, LocalDate reportDate) {
         StringBuilder prompt = new StringBuilder();
 
         prompt.append("Act as a personal health and wellness assistant. ")
@@ -79,7 +396,8 @@ public class GeminiServiceNew {
         // User context
         prompt.append("USER PROFILE:\n")
         .append("- Name: ").append(data.getUser().getName()).append("\n")
-        .append("- Age: ").append(calculateAge(data.getUser().getBirthDate())).append("\n\n");
+        .append("- Age: ").append(calculateAge(data.getUser().getBirthDate())).append("\n")
+        .append("- Report Date: ").append(reportDate.toString()).append("\n\n");
 
         // Wellness metrics
         if (data.getWellness() != null) {
@@ -372,9 +690,9 @@ public class GeminiServiceNew {
     
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-       return userRepository.findByEmail(email)
-               .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o token atual"));
-   }
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para o token atual"));
+    }
 
     // API Response classes
     static class GeminiApiResponse {

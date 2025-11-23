@@ -27,9 +27,6 @@ public class WellnessController {
     private WellnessService service;
     
     @Autowired
-    private GeminiServiceNew geminiService;
-    
-    @Autowired
     private WellnessService wellnessService;
 
     @PostMapping
